@@ -56,7 +56,7 @@ public class CommandHandler
 
             // Execute the command with the command context we just
             // created, along with the service provider for precondition checks.
-            await _commands.ExecuteAsync(
+            _commands.ExecuteAsync(
                 context: context,
                 argPos: argPos,
                 services: null);
