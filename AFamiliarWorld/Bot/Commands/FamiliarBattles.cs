@@ -1,3 +1,4 @@
+using AFamiliarWorld.Bot.Commands.Models;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
@@ -86,17 +87,98 @@ public class FamiliarBattles
 
                 while (firstAttacker.Health >= 0 && secondAttacker.Health >= 0)
                 {
-                    var attack = await firstAttacker.Attack();
-                    var defend = await secondAttacker.Defend(attack);
-                    secondAttacker.Health -= defend;
-                    var criticalHit = attack.CriticalHit == true ? "***" : "";
-                    
-                    embed.WithFields().AddField($"{criticalHit}{firstAttackerUser.Username}'s {firstAttacker.Name} attacks {secondAttackerUser.Username}'s {secondAttacker.Name} with {attack.AbilityName} for {defend} damage!{criticalHit}", $"{secondAttackerUser.Username}'s {secondAttacker.Name} has {secondAttacker.Health} health remaining.");
-                    await reply.ModifyAsync(new Action<MessageProperties>(props =>
+                    var firstAttackerStatusConditions = await firstAttacker.GetStatusConditions();
+                    if (!firstAttackerStatusConditions.Contains(StatusCondition.Stun))
                     {
-                        props.Embed = embed.Build();
-                    }));
-   
+                            
+                        
+                        var attack = await firstAttacker.Attack();
+                        var defend = await secondAttacker.Defend(attack);
+                        secondAttacker.Health -= defend;
+                        var criticalHit = attack.CriticalHit == true ? "***" : "";
+                        
+                        embed.WithFields().AddField($"{criticalHit}{firstAttackerUser.Username}'s {firstAttacker.Name} attacks {secondAttackerUser.Username}'s {secondAttacker.Name} with {attack.AbilityName} for {defend} damage!{criticalHit}", $"{secondAttackerUser.Username}'s {secondAttacker.Name} has {secondAttacker.Health} health remaining.");
+                        await reply.ModifyAsync(new Action<MessageProperties>(props =>
+                        {
+                            props.Embed = embed.Build();
+                        }));
+       
+                        if (secondAttacker.Health <= 0)
+                        {
+                            var victorEmbed = new EmbedBuilder();
+                            victorEmbed.WithColor(Discord.Color.Gold);
+                            victorEmbed.WithTitle($"{firstAttackerUser.Username}'s {firstAttacker.Name} wins!");
+                            victorEmbed.WithImageUrl(
+                                "https://cdn.discordapp.com/attachments/803309924746395691/1376829532660568064/victory-pop-up-golden-assets-award-with-crown-for-game-illustration-golden-banner-with-wings-and-red-flags-vector.jpg?ex=6836bfec&is=68356e6c&hm=ffe35dc277c4b053ae396cf905581e05767837143ef2fffa6305203be11c08e7&");
+                            victorEmbed.WithThumbnailUrl(firstAttackerUser.GetAvatarUrl());
+                            await ReplyAsync(embed: victorEmbed.Build());
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        embed.WithFields().AddField("Stunned!", $"{firstAttackerUser.Username}'s {firstAttacker.Name} is stunned and cannot attack this turn.");
+                        await firstAttacker.RemoveStatusCondition(StatusCondition.Stun);
+                    }
+                    await Task.Delay(3000);
+                    
+                    var secondAttackerStatusConditions = await secondAttacker.GetStatusConditions();
+                    if (!secondAttackerStatusConditions.Contains(StatusCondition.Stun))
+                    {
+                        var attack = await secondAttacker.Attack();
+                        var defend = await firstAttacker.Defend(attack);
+                        firstAttacker.Health -= defend;
+                        var criticalHit = attack.CriticalHit == true ? "**" : "";
+
+                        embed.WithFields().AddField(
+                            $"{criticalHit}{secondAttackerUser.Username}'s {secondAttacker.Name} attacks {firstAttackerUser.Username}'s {firstAttacker.Name} with {attack.AbilityName} for {defend} damage!{criticalHit}",
+                            $"{firstAttackerUser.Username}'s {firstAttacker.Name} has {firstAttacker.Health} health remaining.");
+                        await reply.ModifyAsync(
+                            new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
+
+                        if (firstAttacker.Health <= 0)
+                        {
+                            var victorEmbed = new EmbedBuilder();
+                            victorEmbed.WithColor(Discord.Color.Gold);
+                            victorEmbed.WithTitle($"{secondAttackerUser.Username}'s {secondAttacker.Name} wins!");
+                            victorEmbed.WithImageUrl(
+                                "https://cdn.discordapp.com/attachments/803309924746395691/1376829532660568064/victory-pop-up-golden-assets-award-with-crown-for-game-illustration-golden-banner-with-wings-and-red-flags-vector.jpg?ex=6836bfec&is=68356e6c&hm=ffe35dc277c4b053ae396cf905581e05767837143ef2fffa6305203be11c08e7&");
+                            victorEmbed.WithThumbnailUrl(secondAttackerUser.GetAvatarUrl());
+                            await ReplyAsync(embed: victorEmbed.Build());
+
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        embed.WithFields().AddField("Stunned!", $"{secondAttackerUser.Username}'s {secondAttacker.Name} is stunned and cannot attack this turn.");
+                        await secondAttacker.RemoveStatusCondition(StatusCondition.Stun);
+                    }
+
+                    foreach (var statuscondition in await firstAttacker.GetStatusConditions())
+                    {
+                        switch (statuscondition)
+                        {
+                            case StatusCondition.Burn:
+                                firstAttacker.Health -= 2;
+                                embed.WithFields().AddField($"{firstAttackerUser.Username}'s {firstAttacker.Name} is burning! They take 2 fire damage.", $"{firstAttackerUser.Username}'s {firstAttacker.Name} has {firstAttacker.Health} health remaining.");
+                                break;
+                            case StatusCondition.None:
+                                break;
+                        }
+                    }
+                    foreach (var statuscondition in await secondAttacker.GetStatusConditions())
+                    {
+                        switch (statuscondition)
+                        {
+                            case StatusCondition.Burn:
+                                secondAttacker.Health -= 2;
+                                embed.WithFields().AddField($"{secondAttackerUser.Username}'s {secondAttacker.Name} is burning! They take 2 fire damage.", $"{secondAttackerUser.Username}'s {secondAttacker.Name} has {secondAttacker.Health} health remaining.");
+                                break;
+                            case StatusCondition.None:
+                                break;
+                        }
+                    }
                     if (secondAttacker.Health <= 0)
                     {
                         var victorEmbed = new EmbedBuilder();
@@ -108,19 +190,6 @@ public class FamiliarBattles
                         await ReplyAsync(embed: victorEmbed.Build());
                         break;
                     }
-                    await Task.Delay(3000);
-                    attack = await secondAttacker.Attack();
-                    defend = await firstAttacker.Defend(attack);
-                    firstAttacker.Health -= defend;
-                    criticalHit = attack.CriticalHit == true ? "**" : "";
-                    
-                    embed.WithFields().AddField($"{criticalHit}{secondAttackerUser.Username}'s {secondAttacker.Name} attacks {firstAttackerUser.Username}'s {firstAttacker.Name} with {attack.AbilityName} for {defend} damage!{criticalHit}", 
-                        $"{firstAttackerUser.Username}'s {firstAttacker.Name} has {firstAttacker.Health} health remaining.");
-                    await reply.ModifyAsync(new Action<MessageProperties>(props =>
-                    {
-                        props.Embed = embed.Build();
-                    }));
-                    
                     if (firstAttacker.Health <= 0)
                     {
                         var victorEmbed = new EmbedBuilder();
@@ -133,7 +202,6 @@ public class FamiliarBattles
 
                         break;
                     }
-
                     await Task.Delay(3000);
                 }
             }

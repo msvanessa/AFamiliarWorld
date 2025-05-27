@@ -10,10 +10,12 @@ public class Clockroach:Familiar
     {
         this.actions = new List<Func<Task<FamiliarAction>>>
         {
+            ClockroachAttack
         };
         var random = new Random();
         this.Name = "Clockroach";
         this.Description = "I clock, I roach, I clockroach";
+        this.Quip = "*Winds you up*";
         this.Color = 0xa75600;
         this.Url = "https://media.discordapp.net/attachments/1246170699362729995/1375190322996580412/assets_task_01jvwpn0mqff4vf7b0de9s151x_1747941299_img_1.webp?ex=6831720a&is=6830208a&hm=2ebf5e6cba5c4784f875f7398494e1a82e1269342cc85746db8f9280230d3407&=&format=webp&width=645&height=968";
         this.Power = 4;
@@ -28,12 +30,13 @@ public class Clockroach:Familiar
         this.Speed = 1;
         this.Cuteness = random.Next(1, 10001);
     }
-    
-    public override async Task SpecialAbility()
-    {
-        Console.WriteLine("*Winds you up*");
-    }
     public override async Task<FamiliarAction> Attack()
+    {
+        var random = new Random();
+        var randomAbility = actions[random.Next(actions.Count)];
+        return await randomAbility.Invoke();
+    }
+    public async Task<FamiliarAction> ClockroachAttack()
     {
         var random = new Random();
         var action = new FamiliarAction();
@@ -50,6 +53,8 @@ public class Clockroach:Familiar
 
     public override async Task<int> Defend(FamiliarAction action)
     {
+        var StatusConditions = await GetStatusConditions();
+        await AddStatusCondition(action.StatusCondition);
         int damage = -100;
         if (action.DamageType == DamageType.Physical)
         {

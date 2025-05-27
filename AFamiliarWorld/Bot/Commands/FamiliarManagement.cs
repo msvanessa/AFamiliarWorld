@@ -93,7 +93,7 @@ public class FamiliarManagement
                 Formatting = Formatting.Indented
             };
             var player = JsonConvert.DeserializeObject<Player.Player>(await File.ReadAllTextAsync(Context.User.Id + ".json"), settings);
-            var familiar = await player.Scavenge();
+            var (familiar, Gold) = await player.Scavenge();
             string json = JsonConvert.SerializeObject(player, settings);
             await File.WriteAllTextAsync(filePath, json);
             if (familiar == null)
@@ -102,7 +102,7 @@ public class FamiliarManagement
             }
             else
             {
-                await ReplyAsync("You have successfully scavenged a " +  familiar.Name);
+                await ReplyAsync("You have successfully scavenged a " +  familiar.Name + " and gained " + Gold + " gold!");
                 await ReplyAsync(embed:familiar.Display());
             }
         }

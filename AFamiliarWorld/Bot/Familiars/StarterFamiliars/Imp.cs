@@ -44,6 +44,11 @@ public class Imp:Familiar
             action.CriticalHit = true;
         }
         action.Damage = (Power + random.Next(1, 5)) * (crit);
+        bool burn = random.Next(1, 101) < 21;
+        if (burn)
+        {
+            action.StatusCondition = StatusCondition.Burn;
+        }
         action.DamageType = DamageType.Magical;
         return action;
     }
@@ -62,10 +67,6 @@ public class Imp:Familiar
         action.DamageType = DamageType.Physical;
         return action;
     }
-    public override async Task SpecialAbility()
-    {
-        Console.WriteLine("FIREBOL");
-    }
     public override async Task<FamiliarAction> Attack()
     {
         var random = new Random();
@@ -75,6 +76,8 @@ public class Imp:Familiar
 
     public override async Task<int> Defend(FamiliarAction action)
     {
+        var StatusConditions = await GetStatusConditions();
+        await AddStatusCondition(action.StatusCondition);
         int damage = -100;
         if (action.DamageType == DamageType.Physical)
         {

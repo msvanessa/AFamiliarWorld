@@ -10,10 +10,12 @@ public class Pebblewyrm:Familiar
     {
         this.actions = new List<Func<Task<FamiliarAction>>>
         {
+            PebblewyrmAttack
         };
         var random = new Random();
         this.Name = "Pebblewyrm";
         this.Description = "Rawr!";
+        this.Quip = "*Breathes gravel*";
         this.Color = 0x808080;
         this.Url = "https://media.discordapp.net/attachments/1246170699362729995/1375190944441307277/assets_task_01jvwprr6cfwt8zdrwh2f6td02_1747941436_img_0.webp?ex=6831729e&is=6830211e&hm=63b02e99830de26dbf0f6aa5a6b922c102cc17e1ec78721aa0db4a9b5454f9c1&=&format=webp&width=645&height=968";
         this.Power = 4;
@@ -28,12 +30,13 @@ public class Pebblewyrm:Familiar
         this.Speed = 1;
         this.Cuteness = random.Next(1, 10001);
     }
-    
-    public override async Task SpecialAbility()
-    {
-        Console.WriteLine("*Breathes gravel*");
-    }
     public override async Task<FamiliarAction> Attack()
+    {
+        var random = new Random();
+        var randomAbility = actions[random.Next(actions.Count)];
+        return await randomAbility.Invoke();
+    }
+    public async Task<FamiliarAction> PebblewyrmAttack()
     {
         var random = new Random();
         var action = new FamiliarAction();
@@ -50,6 +53,8 @@ public class Pebblewyrm:Familiar
 
     public override async Task<int> Defend(FamiliarAction action)
     {
+        var StatusConditions = await GetStatusConditions();
+        await AddStatusCondition(action.StatusCondition);
         int damage = -100;
         if (action.DamageType == DamageType.Physical)
         {

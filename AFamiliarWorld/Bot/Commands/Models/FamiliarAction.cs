@@ -6,4 +6,5 @@ public class FamiliarAction
     public DamageType DamageType { get; set; }
     public string AbilityName { get; set; }
     public bool CriticalHit { get; set; } = false;
+    public StatusCondition StatusCondition { get; set; } = StatusCondition.None;
 }

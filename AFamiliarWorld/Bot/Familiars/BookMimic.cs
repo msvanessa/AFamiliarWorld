@@ -10,10 +10,12 @@ public class BookMimic:Familiar
     {
         this.actions = new List<Func<Task<FamiliarAction>>>
         {
+            BookBite
         };
         var random = new Random();
         this.Name = "BookMimic";
         this.Description = "Read me pls c:<";
+        this.Quip = "*Bites u*";
         this.Color = 0xa7743e;
         this.Url = "https://media.discordapp.net/attachments/1246170699362729995/1375188921834668102/assets_task_01jvwpbm43fc7r95023q0ca9ax_1747940954_img_3.webp?ex=683170bc&is=68301f3c&hm=e8e705ab8ca5f2c7eddb82de4b7d355be1330eebe9627a83a34facf63ef911f2&=&format=webp&width=645&height=968";
         this.Power = 4;
@@ -28,16 +30,18 @@ public class BookMimic:Familiar
         this.Speed = 1;
         this.Cuteness = random.Next(1, 10001);
     }
-    
-    public override async Task SpecialAbility()
-    {
-        Console.WriteLine("*Bites u*");
-    }
     public override async Task<FamiliarAction> Attack()
     {
         var random = new Random();
+        var randomAbility = actions[random.Next(actions.Count)];
+        return await randomAbility.Invoke();
+    }
+    
+    public async Task<FamiliarAction> BookBite()
+    {
+        var random = new Random();
         var action = new FamiliarAction();
-        action.AbilityName = "Bite";
+        action.AbilityName = "BookBite";
         int crit = random.Next(1, 101) < Luck ? 2 : 1;
         if (crit == 2)
         {
@@ -50,6 +54,8 @@ public class BookMimic:Familiar
 
     public override async Task<int> Defend(FamiliarAction action)
     {
+        var StatusConditions = await GetStatusConditions();
+        await AddStatusCondition(action.StatusCondition);
         int damage = -100;
         if (action.DamageType == DamageType.Physical)
         {

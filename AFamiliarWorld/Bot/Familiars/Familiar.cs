@@ -22,9 +22,32 @@ public class Familiar
     public string FamiliarID { get; set; }
     public bool ActiveFamiliar { get; set; } = false;
     
+    private List<StatusCondition> StatusConditions = new List<StatusCondition>();
+    
     public Familiar()
     {
         FamiliarID = Guid.NewGuid().ToString();
+    }
+
+    public async Task<List <StatusCondition>> GetStatusConditions()
+    {
+        return StatusConditions;
+    }
+    
+    public async Task RemoveStatusCondition(StatusCondition condition)
+    {
+        if (StatusConditions.Contains(condition))
+        {
+            StatusConditions.Remove(condition);
+        }
+    }
+    
+    public async Task AddStatusCondition(StatusCondition condition)
+    {
+        if (!StatusConditions.Contains(condition))
+        {
+            StatusConditions.Add(condition);
+        }
     }
 
     public virtual async Task SpecialAbility()

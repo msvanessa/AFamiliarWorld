@@ -10,10 +10,12 @@ public class SkeleMouse:Familiar
     {
         this.actions = new List<Func<Task<FamiliarAction>>>
         {
+            SkeleMouseAttack
         };
         var random = new Random();
         this.Name = "SkeleMouse";
         this.Description = "Yip yip!";
+        this.Quip = "*Brings u smol piece of cheese*";
         this.Color = 0xc7bdbd;
         this.Url = "https://media.discordapp.net/attachments/1246170699362729995/1375185078405173270/assets_task_01jvwng9ypectvwtxbmwcqyx94_1747940061_img_1.webp?ex=68316d28&is=68301ba8&hm=4fb5f179c149b3d623b72afff86a558ab9bed01dba98f24aed7512bb8e6a1d7b&=&format=webp&width=645&height=968";
         this.Power = 4;
@@ -28,12 +30,13 @@ public class SkeleMouse:Familiar
         this.Speed = 1;
         this.Cuteness = random.Next(1, 10001);
     }
-    
-    public override async Task SpecialAbility()
-    {
-        Console.WriteLine("*Brings u smol piece of cheese*");
-    }
     public override async Task<FamiliarAction> Attack()
+    {
+        var random = new Random();
+        var randomAbility = actions[random.Next(actions.Count)];
+        return await randomAbility.Invoke();
+    }
+    public async Task<FamiliarAction> SkeleMouseAttack()
     {
         var random = new Random();
         var action = new FamiliarAction();
@@ -50,6 +53,8 @@ public class SkeleMouse:Familiar
 
     public override async Task<int> Defend(FamiliarAction action)
     {
+        var StatusConditions = await GetStatusConditions();
+        await AddStatusCondition(action.StatusCondition);
         int damage = -100;
         if (action.DamageType == DamageType.Physical)
         {

@@ -10,10 +10,12 @@ public class PaperCraneGolem:Familiar
     {
         this.actions = new List<Func<Task<FamiliarAction>>>
         {
+            PaperCranePunch
         };
         var random = new Random();
         this.Name = "Paper Crane Golem";
         this.Description = "Beep boop";
+        this.Quip = "*Does the robot*";
         this.Color = 0xb66d34;
         this.Url = "https://cdn.discordapp.com/attachments/1246170699362729995/1375184022317039677/assets_task_01jvwn8e9bejabs40h4cag97ft_1747939803_img_1.webp?ex=68316c2c&is=68301aac&hm=fd421e630543b8d6e3601d4223cd4070d7e4a7083c579df74e450c0ac1cddcbc&";
         this.Power = 8;
@@ -28,12 +30,13 @@ public class PaperCraneGolem:Familiar
         this.Speed = 1;
         this.Cuteness = random.Next(1, 10001);
     }
-    
-    public override async Task SpecialAbility()
-    {
-        Console.WriteLine("*Does the robot*");
-    }
     public override async Task<FamiliarAction> Attack()
+    {
+        var random = new Random();
+        var randomAbility = actions[random.Next(actions.Count)];
+        return await randomAbility.Invoke();
+    }
+    public async Task<FamiliarAction> PaperCranePunch()
     {
         var random = new Random();
         var action = new FamiliarAction();
@@ -50,6 +53,8 @@ public class PaperCraneGolem:Familiar
 
     public override async Task<int> Defend(FamiliarAction action)
     {
+        var StatusConditions = await GetStatusConditions();
+        await AddStatusCondition(action.StatusCondition);
         int damage = -100;
         if (action.DamageType == DamageType.Physical)
         {

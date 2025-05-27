@@ -11,6 +11,8 @@ public class CrystalBeetle:Familiar
     {
         this.actions = new List<Func<Task<FamiliarAction>>>
         {
+            BeetleBonk,
+            Slam
         };
         var random = new Random();
         this.Name = "Crystal Beetle";
@@ -34,6 +36,13 @@ public class CrystalBeetle:Familiar
     public override async Task<FamiliarAction> Attack()
     {
         var random = new Random();
+        var randomAbility = actions[random.Next(actions.Count)];
+        return await randomAbility.Invoke();
+    }
+
+    public async Task<FamiliarAction> BeetleBonk()
+    {
+        var random = new Random();
         var action = new FamiliarAction();
         action.AbilityName = "Beetle Bonk";
         int crit = random.Next(1, 101) < Luck ? 2 : 1;
@@ -46,8 +55,20 @@ public class CrystalBeetle:Familiar
         return action;
     }
 
+    public async Task<FamiliarAction> Slam()
+    {
+        var action = new FamiliarAction();
+        action.AbilityName = "Slam";
+        action.Damage = 1;
+        action.DamageType = DamageType.Physical;
+        action.StatusCondition = StatusCondition.Stun;
+        return action;
+    }
+
     public override async Task<int> Defend(FamiliarAction action)
     {
+        var StatusConditions = await GetStatusConditions();
+        await AddStatusCondition(action.StatusCondition);
         int damage = -100;
         if (action.DamageType == DamageType.Physical)
         {
