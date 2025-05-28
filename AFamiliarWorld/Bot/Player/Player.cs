@@ -4,7 +4,7 @@ namespace AFamiliarWorld.Bot.Player;
 
 public class Player
 {
-    public List<Familiar> familiars { get; set; }
+    public List<Familiar> familiars { get; set; } = new List<Familiar>();
     private List<Type> AvailableFamiliars = new List<Type>(){typeof(Imp), typeof(PaperCraneGolem), typeof(CrystalBeetle), typeof(Batnana), typeof(BookMimic), typeof(Clockroach), typeof(LandShork), typeof(NoodleCrab), typeof(Pebblewyrm), typeof(Ropopus), typeof(SkeleMouse), typeof(SlimeCat), typeof(StarRaven)};
     public long timeSinceLastScavenge = 0;
     public int Gold { get; set; } = 100;
