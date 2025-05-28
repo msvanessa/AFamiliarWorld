@@ -24,8 +24,7 @@ public class FamiliarBattles
                     await ReplyAsync("You cannot challenge a bot.");
                     return;
                 }
-
-
+                
                 await ReplyAsync($"You have challenged {user.Username} to a familiar battle! <@{user.Id}>, type 'accept' to accept the challenge within 30 seconds.");
                 var response = await WaitForMessageAsync(user, Context.Channel, TimeSpan.FromSeconds(30));
                 if (response == null || !response.Content.Equals("accept", StringComparison.OrdinalIgnoreCase))
@@ -36,22 +35,15 @@ public class FamiliarBattles
                 
                 await ReplyAsync($"{user.Username} accepted the challenge!");
                 
-                var settings = new JsonSerializerSettings
+                
+                var player = FileManager.FetchUserData(Context.User.Id);
+                var opponent = FileManager.FetchUserData(user.Id);
+                if (player == null || opponent == null)
                 {
-                    TypeNameHandling = TypeNameHandling.Auto,
-                    Formatting = Formatting.Indented
-                };
-                if (!File.Exists(Context.User.Id + ".json") || !File.Exists(user.Id + ".json"))
-                {
-                    await ReplyAsync(
-                        "Both players must have a profile created. Use !createplayer to create a profile.");
+                    await ReplyAsync("One of the players does not have a profile. Please create a profile using the `!createplayer` command.");
                     return;
-                }
-
-                var player =
-                    JsonConvert.DeserializeObject<Player.Player>(File.ReadAllText(Context.User.Id + ".json"), settings);
-                var opponent =
-                    JsonConvert.DeserializeObject<Player.Player>(File.ReadAllText(user.Id + ".json"), settings);
+                }   
+                
                 var activeFamiliar = player.familiars.FirstOrDefault(f => f.ActiveFamiliar);
                 if (activeFamiliar == null)
                 {
