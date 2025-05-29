@@ -6,11 +6,16 @@ public class Batnana:Familiar
 {
     private List<Func<Task<FamiliarAttackingAction>>> actions;
     private int MaxHealth = 40;
+    private bool isEvading = false;
     public Batnana()
     {
         this.actions = new List<Func<Task<FamiliarAttackingAction>>>
         {
-            BatnanaMonch
+            Monch,
+            EvasiveFlutter,
+            PotassiumSurge,
+            FruitfulShriek,
+            Scritchies
         };
         var random = new Random();
         this.Name = "Batnana";
@@ -29,6 +34,12 @@ public class Batnana:Familiar
         this.Health = MaxHealth;
         this.Speed = 1;
         this.Cuteness = random.Next(1, 10001);
+        
+        this.Abilities.Add(new Ability("Spell: MONCH!", $"A physical attack that deals {this.Power}+1d4 damage and heals 1 health."));
+        this.Abilities.Add(new Ability("Spell: Evasive Flutter", $"A physical attack that deals 0 damage and evades the next attack, reflecting 2 damage back to the attacker."));
+        this.Abilities.Add(new Ability("Spell: Potassium Surge", $"A physical attack that deals 0 damage and increases the Batnana's Willpower and Power by 1."));
+        this.Abilities.Add(new Ability("Spell: FruitfulShriek", $"A physical attack that deals 1 true damage and stuns the target."));
+        this.Abilities.Add(new Ability("Spell: Scritchies", $"A physical attack that deals 2 true damage and causes the target to bleed."));
     }
     public override async Task<FamiliarAttackingAction> Attack()
     {
@@ -36,18 +47,111 @@ public class Batnana:Familiar
         var randomAbility = actions[random.Next(actions.Count)];
         return await randomAbility.Invoke();
     }
-    public async Task<FamiliarAttackingAction> BatnanaMonch()
+    public async Task<FamiliarAttackingAction> Monch()
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
-        action.AbilityName = "Batnana Monch";
+        action.AbilityName = "MONCH!";
         int crit = random.Next(1, 101) < Luck ? 2 : 1;
         if (crit == 2)
         {
             action.CriticalHit = true;
         }
+
+        if (!(await this.GetStatusConditions()).Contains(StatusCondition.Bleed))
+        {
+            this.Health += 1;
+        }
+
         action.Damage = (Power + random.Next(1, 5)) * (crit);
         action.DamageType = DamageType.Physical;
         return action;
+    }
+
+    public async Task<FamiliarAttackingAction> EvasiveFlutter()
+    {
+        var random = new Random();
+        var action = new FamiliarAttackingAction();
+        action.AbilityName = "Evasive Flutter";
+        this.isEvading = true;
+        action.Damage = 0;
+        action.DamageType = DamageType.Physical;
+        return action;
+    }
+    
+    public async Task<FamiliarAttackingAction> PotassiumSurge()
+    {
+        var random = new Random();
+        var action = new FamiliarAttackingAction();
+        action.AbilityName = "Potassium Surge";
+        action.Damage = 0;
+        action.DamageType = DamageType.Physical;
+        this.Willpower += 1;
+        this.Power += 1;
+        return action;
+    }
+    
+    public async Task<FamiliarAttackingAction> FruitfulShriek()
+    {
+        var random = new Random();
+        var action = new FamiliarAttackingAction();
+        action.AbilityName = "Fruitful Shriek";
+        action.Damage = 1;
+        action.DamageType = DamageType.Physical;
+        action.IsTrueDamage = true;
+        action.StatusConditions = new List<StatusCondition>{StatusCondition.Stun};
+        return action;
+    }
+    
+    public async Task<FamiliarAttackingAction> Scritchies()
+    {
+        var random = new Random();
+        var action = new FamiliarAttackingAction();
+        action.AbilityName = "Fruitful Shriek";
+        action.Damage = 2;
+        action.DamageType = DamageType.Physical;
+        action.IsTrueDamage = true;
+        action.StatusConditions = new List<StatusCondition>{StatusCondition.Bleed};
+        return action;
+    }
+    
+    public override async Task<FamiliarDefendingAction> Defend(FamiliarAttackingAction attackingAction)
+    {
+        if (attackingAction.StatusConditions != null)
+        {
+            foreach (var statusCondition in attackingAction.StatusConditions)
+            {
+                await this.AddStatusCondition(statusCondition);
+            }
+        }
+        
+        var defendingAction = new FamiliarDefendingAction();
+        if (!isEvading)
+        {
+            if (attackingAction.IsTrueDamage)
+            {
+                defendingAction.DamageTaken = attackingAction.Damage;
+            }
+            else
+            {
+                if (attackingAction.DamageType == DamageType.Physical)
+                {
+                    defendingAction.DamageTaken = attackingAction.Damage - this.Physique;
+                }
+                else if (attackingAction.DamageType == DamageType.Magical)
+                {
+                    defendingAction.DamageTaken = (attackingAction.Damage - Resolve);
+                }
+            }
+        }
+        else
+        {
+            defendingAction.DamageTaken = 0;
+            defendingAction.IsReflecting = true;
+            defendingAction.DamageReflected = 2;
+            defendingAction.DamageReflectedMessage = "Evasive Flutter";
+        }
+
+        return defendingAction;
     }
 }

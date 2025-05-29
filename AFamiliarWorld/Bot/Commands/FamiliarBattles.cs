@@ -133,30 +133,53 @@ public class FamiliarBattles
         private static async Task<bool> DoTurn(Familiar firstAttacker, Familiar secondAttacker, SocketUser firstAttackerUser, SocketUser secondAttackerUser, EmbedBuilder embed, RestUserMessage reply, SocketCommandContext context)
         {
             var firstAttackerStatusConditions = await firstAttacker.GetStatusConditions();
+            var random = new Random();
             if (!firstAttackerStatusConditions.Contains(StatusCondition.Stun))
             {
-                var attack = await firstAttacker.Attack();
-                var defend = await secondAttacker.Defend(attack);
-                secondAttacker.Health -= defend.DamageTaken;
-                
-                var criticalHit = attack.CriticalHit == true ? "***" : "";
-                embed.WithFields().AddField(
-                    $"{criticalHit}{firstAttackerUser.Username}'s {firstAttacker.Name} attacks {secondAttackerUser.Username}'s {secondAttacker.Name} with {attack.AbilityName} for {defend.DamageTaken} damage!{criticalHit}",
-                    $"{secondAttackerUser.Username}'s {secondAttacker.Name} has {secondAttacker.Health} health remaining.");
-                await reply.ModifyAsync(
-                    new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
-                var winner = CheckWinner(context, firstAttacker, secondAttackerUser, secondAttacker, secondAttackerUser);
-                if (winner) return winner;
-                
-                if (defend.IsReflecting)
+                var confused = random.Next(1, 101) <= 50;
+                if ((await firstAttacker.GetStatusConditions()).Contains(StatusCondition.Confuse) && confused)
                 {
-                    firstAttacker.Health -= defend.DamageReflected;
+                    
+                    firstAttacker.Health -= 3;
                     embed.WithFields().AddField(
-                        $"{firstAttackerUser.Username}'s {firstAttacker.Name} reflects {defend.DamageReflected} damage back to {secondAttackerUser.Username}'s {secondAttacker.Name} using its {defend.DamageReflectedMessage}!",
-                        $"{secondAttackerUser.Username}'s {secondAttacker.Name} has {secondAttacker.Health} health remaining.");
+                        $"{firstAttackerUser.Username}'s {firstAttacker.Name} is confused and hurts itself in its confusion for 3 damage!",
+                        $"{firstAttackerUser.Username}'s {firstAttacker.Name} has {firstAttacker.Health} health remaining.");
+                    await reply.ModifyAsync(
+                        new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
                 }
-                winner = CheckWinner(context, secondAttacker, firstAttackerUser, firstAttacker, firstAttackerUser);
-                return winner;
+                else
+                {
+                    var attack = await firstAttacker.Attack();
+                    var defend = await secondAttacker.Defend(attack);
+                    secondAttacker.Health -= defend.DamageTaken;
+
+                    var criticalHit = attack.CriticalHit == true ? "***" : "";
+                    embed.WithFields().AddField(
+                        $"{criticalHit}{firstAttackerUser.Username}'s {firstAttacker.Name} attacks {secondAttackerUser.Username}'s {secondAttacker.Name} with {attack.AbilityName} for {defend.DamageTaken} damage!{criticalHit}",
+                        $"{secondAttackerUser.Username}'s {secondAttacker.Name} has {secondAttacker.Health} health remaining.");
+                    await reply.ModifyAsync(
+                        new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
+
+                    var winner = CheckWinner(context, secondAttacker, secondAttackerUser, firstAttacker,
+                        firstAttackerUser);
+                    if (winner) return winner;
+                    winner = CheckWinner(context, firstAttacker, firstAttackerUser, secondAttacker,
+                        secondAttackerUser);
+                    if (winner) return winner;
+
+                    if (defend.IsReflecting)
+                    {
+                        firstAttacker.Health -= defend.DamageReflected;
+                        embed.WithFields().AddField(
+                            $"{firstAttackerUser.Username}'s {firstAttacker.Name} reflects {defend.DamageReflected} damage back to {secondAttackerUser.Username}'s {secondAttacker.Name} using its {defend.DamageReflectedMessage}!",
+                            $"{secondAttackerUser.Username}'s {secondAttacker.Name} has {secondAttacker.Health} health remaining.");
+                    }
+
+                    winner = CheckWinner(context, secondAttacker, firstAttackerUser, firstAttacker,
+                        firstAttackerUser);
+                    return winner;
+            
+                }
             }
             else
             {
@@ -165,11 +188,12 @@ public class FamiliarBattles
                     new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
                 await firstAttacker.RemoveStatusCondition(StatusCondition.Stun);
             }
-
             return false;
         }
+        
         private static async Task CheckStatusCondition(Familiar familiar, SocketUser user, EmbedBuilder embed, RestUserMessage reply)
         {
+            var removeConfuse = false;
             foreach (var statusCondition in (await familiar.GetStatusConditions()).Distinct())
             {
                 switch (statusCondition)
@@ -187,9 +211,21 @@ public class FamiliarBattles
                         await reply.ModifyAsync(
                             new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
                         break;
+                    case StatusCondition.Confuse:
+                        var random = new Random();
+                        removeConfuse = random.Next(1, 101) <= 20;
+
+                        break;
                     case StatusCondition.None:
                         break;
                 }
+            }
+            if (removeConfuse)
+            {
+                await familiar.RemoveStatusCondition(StatusCondition.Confuse);
+                embed.WithFields().AddField($"{user.Username}'s {familiar.Name} snaps out of confusion!", $"{user.Username}'s {familiar.Name} is no longer confused.");
+                await reply.ModifyAsync(
+                    new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
             }
         }
         

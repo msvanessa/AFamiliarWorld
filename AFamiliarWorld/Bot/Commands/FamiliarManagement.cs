@@ -29,7 +29,7 @@ public class FamiliarManagement
                 player.familiars = new List<Familiar>();
                 
                 // DELETEME
-                var DELETEME = new List<Type>(){typeof(Imp), typeof(PaperCraneGolem), typeof(CrystalBeetle), typeof(Batnana), typeof(BookMimic), typeof(Clockroach), typeof(LandShork), typeof(NoodleCrab), typeof(Pebblewyrm), typeof(Ropopus), typeof(SkeleMouse), typeof(SlimeCat), typeof(StarRaven)};
+                var DELETEME = new List<Type>(){typeof(Bandcoon), typeof(Imp), typeof(PaperCraneGolem), typeof(CrystalBeetle), typeof(Batnana), typeof(BookMimic), typeof(Clockroach), typeof(LandShork), typeof(NoodleCrab), typeof(Pebblewyrm), typeof(Ropopus), typeof(SkeleMouse), typeof(SlimeCat), typeof(StarRaven)};
                 foreach (var fam in DELETEME)
                 {
                     player.familiars.Add((Familiar) Activator.CreateInstance(fam));
