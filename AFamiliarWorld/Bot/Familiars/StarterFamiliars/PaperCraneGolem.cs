@@ -10,7 +10,9 @@ public class PaperCraneGolem:Familiar
     {
         this.actions = new List<Func<Task<FamiliarAttackingAction>>>
         {
-            PaperCranePunch
+            PapercutBarrage,
+            GuillotineFold,
+            ConfettiBurst
         };
         var random = new Random();
         this.Name = "Paper Crane Golem";
@@ -36,18 +38,45 @@ public class PaperCraneGolem:Familiar
         var randomAbility = actions[random.Next(actions.Count)];
         return await randomAbility.Invoke();
     }
-    public async Task<FamiliarAttackingAction> PaperCranePunch()
+    public async Task<FamiliarAttackingAction> PapercutBarrage()
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
-        action.AbilityName = "Paper Crane Punch";
+        action.AbilityName = "Papercut Barrage";
         int crit = random.Next(1, 101) < Luck ? 2 : 1;
         if (crit == 2)
         {
             action.CriticalHit = true;
         }
-        action.Damage = (Power + random.Next(1, 5)) * (crit);
+        action.Damage = (Power + random.Next(1, 5) + random.Next(1, 5)) * (crit);
         action.DamageType = DamageType.Physical;
+        return action;
+    }
+    
+    public async Task<FamiliarAttackingAction> GuillotineFold()
+    {
+        var random = new Random();
+        var action = new FamiliarAttackingAction();
+        action.AbilityName = "Guillotine Fold";
+        action.Damage = random.Next(0, 101) == 1 ? 9999 : 0;
+        action.IsTrueDamage = true;
+        action.DamageType = DamageType.Physical;
+        return action;
+    }
+    
+    public async Task<FamiliarAttackingAction> ConfettiBurst()
+    {
+        var random = new Random();
+        var action = new FamiliarAttackingAction();
+        action.AbilityName = "Confetti Burst";
+        int crit = random.Next(1, 101) < Luck ? 2 : 1;
+        if (crit == 2)
+        {
+            action.CriticalHit = true;
+        }
+        action.Damage = (Willpower + random.Next(1, 7)) * (crit);
+        action.DamageType = DamageType.Magical;
+        action.StatusConditions = new List<StatusCondition>() { StatusCondition.Confuse};
         return action;
     }
 }

@@ -160,7 +160,8 @@ public class Familiar
                 defendingAction.DamageTaken = (attackingAction.Damage - Resolve);
             }
         }
-
+        if(defendingAction.DamageTaken < 0)
+            defendingAction.DamageTaken = 0;
         return defendingAction;
     }
 }

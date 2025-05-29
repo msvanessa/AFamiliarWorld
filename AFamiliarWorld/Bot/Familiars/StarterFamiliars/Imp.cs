@@ -10,7 +10,7 @@ public class Imp:Familiar
     {
         this.actions = new List<Func<Task<FamiliarAttackingAction>>>
         {
-            Fireball,
+            Firebolt,
             Scratch,
             Sting,
             WingFlap
@@ -34,7 +34,7 @@ public class Imp:Familiar
         this.Speed = 1;
         this.Cuteness = random.Next(1, 10001);
         
-        this.Abilities.Add(new Ability("Spell: Fireball", $"A fiery attack that deals {this.Physique}+1d4 damage and has a 20% chance to burn the target."));
+        this.Abilities.Add(new Ability("Spell: Firebolt", $"A fiery attack that deals {this.Willpower}+1d4 damage and has a 20% chance to burn the target."));
         this.Abilities.Add(new Ability("Spell: Scratch", $"A physical attack that deals {this.Physique}+1d4 damage."));
         this.Abilities.Add(new Ability("Spell: Sting", $"A physical attack that deals 2 true damage and poisons the target."));
         this.Abilities.Add(new Ability("Spell: Wing Flap", $"A magical attack that deals 0 damage and clears all status conditions, transfering them to the target."));
@@ -72,11 +72,11 @@ public class Imp:Familiar
         return action;
     }
     
-    public async Task<FamiliarAttackingAction> Fireball()
+    public async Task<FamiliarAttackingAction> Firebolt()
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
-        action.AbilityName = "Imp Firebol";
+        action.AbilityName = "Firebolt";
         int crit = random.Next(1, 101) < Luck ? 2 : 1;
         if (crit == 2)
         {
