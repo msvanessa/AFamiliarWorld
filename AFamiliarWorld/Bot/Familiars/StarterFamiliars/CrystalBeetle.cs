@@ -5,11 +5,11 @@ namespace AFamiliarWorld.Bot.Familiars;
 
 public class CrystalBeetle:Familiar
 {
-    private List<Func<Task<FamiliarAction>>> actions;
+    private List<Func<Task<FamiliarAttackingAction>>> actions;
     private int MaxHealth = 40;
     public CrystalBeetle()
     {
-        this.actions = new List<Func<Task<FamiliarAction>>>
+        this.actions = new List<Func<Task<FamiliarAttackingAction>>>
         {
             BeetleBonk,
             Slam
@@ -33,17 +33,17 @@ public class CrystalBeetle:Familiar
         this.Cuteness = Math.Min(random.Next(1, 10001), random.Next(1, 10001));
     }
     
-    public override async Task<FamiliarAction> Attack()
+    public override async Task<FamiliarAttackingAction> Attack()
     {
         var random = new Random();
         var randomAbility = actions[random.Next(actions.Count)];
         return await randomAbility.Invoke();
     }
 
-    public async Task<FamiliarAction> BeetleBonk()
+    public async Task<FamiliarAttackingAction> BeetleBonk()
     {
         var random = new Random();
-        var action = new FamiliarAction();
+        var action = new FamiliarAttackingAction();
         action.AbilityName = "Beetle Bonk";
         int crit = random.Next(1, 101) < Luck ? 2 : 1;
         if (crit == 2)
@@ -55,9 +55,9 @@ public class CrystalBeetle:Familiar
         return action;
     }
 
-    public async Task<FamiliarAction> Slam()
+    public async Task<FamiliarAttackingAction> Slam()
     {
-        var action = new FamiliarAction();
+        var action = new FamiliarAttackingAction();
         action.AbilityName = "Slam";
         action.Damage = 1;
         action.DamageType = DamageType.Physical;
@@ -65,29 +65,30 @@ public class CrystalBeetle:Familiar
         return action;
     }
 
-    public override async Task<int> Defend(FamiliarAction action)
+    public override async Task<FamiliarDefendingAction> Defend(FamiliarAttackingAction attackingAction)
     {
-        if (action.StatusConditions != null)
+        if (attackingAction.StatusConditions != null)
         {
-            foreach (var statusCondition in action.StatusConditions)
+            foreach (var statusCondition in attackingAction.StatusConditions)
             {
                 await this.AddStatusCondition(statusCondition);
             }
         }
 
-        int damage = -100;
-        if (action.DamageType == DamageType.Physical)
+        var defendingAction = new FamiliarDefendingAction()
         {
-            damage = action.Damage - Physique;
-        }
-        else if (action.DamageType == DamageType.Magical)
+            
+        };
+        
+        if (attackingAction.DamageType == DamageType.Physical)
         {
-            damage = (action.Damage - Resolve);
+            defendingAction.DamageTaken = attackingAction.Damage - Physique;
         }
-        if (damage < 1)
+        else if (attackingAction.DamageType == DamageType.Magical)
         {
-            damage = 1;
+            defendingAction.DamageTaken = (attackingAction.Damage - Resolve);
         }
-        return damage;
+        
+        return defendingAction;
     }
 }

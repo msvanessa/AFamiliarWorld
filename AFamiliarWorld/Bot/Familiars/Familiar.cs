@@ -114,13 +114,13 @@ public class Familiar
         return embed;
     }
 
-    public virtual async Task<FamiliarAction> Attack()
+    public virtual async Task<FamiliarAttackingAction> Attack()
     {
         return null;
     }
 
-    public virtual async Task<int> Defend(FamiliarAction action)
+    public virtual async Task<FamiliarDefendingAction> Defend(FamiliarAttackingAction attackingAction)
     {
-        return -1;
+        return null;
     }
 }

@@ -1,4 +1,5 @@
 using AFamiliarWorld.Bot.Familiars;
+using AFamiliarWorld.Bot.Familiars.StarterFamiliars;
 
 namespace AFamiliarWorld.Bot.Player;
 

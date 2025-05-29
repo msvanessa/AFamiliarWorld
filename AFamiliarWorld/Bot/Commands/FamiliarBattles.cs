@@ -124,15 +124,25 @@ public class FamiliarBattles
             {
                 var attack = await firstAttacker.Attack();
                 var defend = await secondAttacker.Defend(attack);
-                secondAttacker.Health -= defend;
+                secondAttacker.Health -= defend.DamageTaken;
+                
                 var criticalHit = attack.CriticalHit == true ? "***" : "";
-
                 embed.WithFields().AddField(
                     $"{criticalHit}{firstAttackerUser.Username}'s {firstAttacker.Name} attacks {secondAttackerUser.Username}'s {secondAttacker.Name} with {attack.AbilityName} for {defend} damage!{criticalHit}",
                     $"{secondAttackerUser.Username}'s {secondAttacker.Name} has {secondAttacker.Health} health remaining.");
                 await reply.ModifyAsync(
                     new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
                 var winner = CheckWinner(context, firstAttacker, secondAttackerUser, secondAttacker, secondAttackerUser);
+                if (winner) return winner;
+                
+                if (defend.IsReflecting)
+                {
+                    firstAttacker.Health -= defend.DamageReflected;
+                    embed.WithFields().AddField(
+                        $"{firstAttackerUser.Username}'s {firstAttacker.Name} reflects {defend.DamageReflected} damage back to {secondAttackerUser.Username}'s {secondAttacker.Name} using its {defend.DamageReflectedMessage}!",
+                        $"{secondAttackerUser.Username}'s {secondAttacker.Name} has {secondAttacker.Health} health remaining.");
+                }
+                winner = CheckWinner(context, secondAttacker, firstAttackerUser, firstAttacker, firstAttackerUser);
                 return winner;
             }
             else
@@ -205,7 +215,5 @@ public class FamiliarBattles
 
             return completedTask == tcs.Task ? await tcs.Task : null;
         }
-        
     }
-    
 }
