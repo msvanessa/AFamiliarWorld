@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 using AFamiliarWorld.Bot.Commands.Models;
 using Discord;
 
