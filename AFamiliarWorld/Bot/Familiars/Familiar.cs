@@ -33,7 +33,11 @@ public class Familiar
     {
         return StatusConditions;
     }
-    
+
+    public async Task ClearStatusConditions()
+    {
+        this.StatusConditions.Clear();
+    }
     public async Task RemoveStatusCondition(StatusCondition condition)
     {
         if (StatusConditions.Contains(condition))
@@ -44,15 +48,10 @@ public class Familiar
     
     public async Task AddStatusCondition(StatusCondition condition)
     {
-        if (!StatusConditions.Contains(condition))
+        if (!StatusConditions.Contains(condition) || condition == StatusCondition.Poison)
         {
             StatusConditions.Add(condition);
         }
-    }
-
-    public virtual async Task SpecialAbility()
-    {
-        
     }
 
     public Embed Display()

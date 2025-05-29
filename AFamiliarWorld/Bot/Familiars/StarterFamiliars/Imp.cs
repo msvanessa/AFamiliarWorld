@@ -12,7 +12,9 @@ public class Imp:Familiar
         this.actions = new List<Func<Task<FamiliarAction>>>
         {
             Fireball,
-            Scratch
+            Scratch,
+            Sting,
+            WingFlap
         };
         var random = new Random();
         this.Name = "Imp";
@@ -33,6 +35,36 @@ public class Imp:Familiar
         this.Cuteness = random.Next(1, 10001);
     }
 
+    public async Task<FamiliarAction> WingFlap()
+    {
+        var action = new FamiliarAction()
+        {
+            AbilityName = "Wing flap",
+            Damage = 0,
+            CriticalHit = false,
+            DamageType = DamageType.Magical,
+            StatusConditions = (await this.GetStatusConditions()).ToList()
+        };
+
+        await this.ClearStatusConditions();
+        return action;
+    }
+
+    public async Task<FamiliarAction> Sting()
+    {
+        var random = new Random();
+        var crit = random.Next(1, 101) < this.Luck;
+        var action = new FamiliarAction()
+        {
+            AbilityName = "Sting",
+            Damage = crit ? 4:2,
+            CriticalHit = random.Next(1, 101) < this.Luck,
+            DamageType = DamageType.Physical,
+            StatusConditions = new List<StatusCondition>() { StatusCondition.Poison }
+        };
+        return action;
+    }
+    
     public async Task<FamiliarAction> Fireball()
     {
         var random = new Random();
@@ -47,7 +79,7 @@ public class Imp:Familiar
         bool burn = random.Next(1, 101) < 21;
         if (burn)
         {
-            action.StatusCondition = StatusCondition.Burn;
+            action.StatusConditions = new List<StatusCondition>() { StatusCondition.Burn };
         }
         action.DamageType = DamageType.Magical;
         return action;
@@ -76,8 +108,13 @@ public class Imp:Familiar
 
     public override async Task<int> Defend(FamiliarAction action)
     {
-        var StatusConditions = await GetStatusConditions();
-        await AddStatusCondition(action.StatusCondition);
+        if (action.StatusConditions != null)
+        {
+            foreach (var statusCondition in action.StatusConditions)
+            {
+                await this.AddStatusCondition(statusCondition);
+            }
+        }
         int damage = -100;
         if (action.DamageType == DamageType.Physical)
         {

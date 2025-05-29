@@ -54,8 +54,13 @@ public class BookMimic:Familiar
 
     public override async Task<int> Defend(FamiliarAction action)
     {
-        var StatusConditions = await GetStatusConditions();
-        await AddStatusCondition(action.StatusCondition);
+        if (action.StatusConditions != null)
+        {
+            foreach (var statusCondition in action.StatusConditions)
+            {
+                await this.AddStatusCondition(statusCondition);
+            }
+        }
         int damage = -100;
         if (action.DamageType == DamageType.Physical)
         {
