@@ -33,8 +33,7 @@ public class Imp:Familiar
         this.Health = MaxHealth;
         this.Speed = 1;
         this.Cuteness = random.Next(1, 10001);
-
-        this.Abilities = new List<Ability>();
+        
         this.Abilities.Add(new Ability("Spell: Fireball", $"A fiery attack that deals {this.Physique}+1d4 damage and has a 20% chance to burn the target."));
         this.Abilities.Add(new Ability("Spell: Scratch", $"A physical attack that deals {this.Physique}+1d4 damage."));
         this.Abilities.Add(new Ability("Spell: Sting", $"A physical attack that deals 2 true damage and poisons the target."));
