@@ -43,7 +43,8 @@ public class Imp:Familiar
             Damage = 0,
             CriticalHit = false,
             DamageType = DamageType.Magical,
-            StatusConditions = (await this.GetStatusConditions()).ToList()
+            StatusConditions = (await this.GetStatusConditions()).ToList(),
+            IsTrueDamage = true
         };
 
         await this.ClearStatusConditions();
@@ -60,7 +61,8 @@ public class Imp:Familiar
             Damage = crit ? 4:2,
             CriticalHit = random.Next(1, 101) < this.Luck,
             DamageType = DamageType.Physical,
-            StatusConditions = new List<StatusCondition>() { StatusCondition.Poison }
+            StatusConditions = new List<StatusCondition>() { StatusCondition.Poison },
+            IsTrueDamage = true
         };
         return action;
     }

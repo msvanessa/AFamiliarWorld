@@ -128,7 +128,7 @@ public class FamiliarBattles
                 
                 var criticalHit = attack.CriticalHit == true ? "***" : "";
                 embed.WithFields().AddField(
-                    $"{criticalHit}{firstAttackerUser.Username}'s {firstAttacker.Name} attacks {secondAttackerUser.Username}'s {secondAttacker.Name} with {attack.AbilityName} for {defend} damage!{criticalHit}",
+                    $"{criticalHit}{firstAttackerUser.Username}'s {firstAttacker.Name} attacks {secondAttackerUser.Username}'s {secondAttacker.Name} with {attack.AbilityName} for {defend.DamageTaken} damage!{criticalHit}",
                     $"{secondAttackerUser.Username}'s {secondAttacker.Name} has {secondAttacker.Health} health remaining.");
                 await reply.ModifyAsync(
                     new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));

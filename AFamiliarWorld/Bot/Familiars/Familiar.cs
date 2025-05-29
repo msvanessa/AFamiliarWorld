@@ -133,16 +133,22 @@ public class Familiar
         {
             
         };
-        
-        if (attackingAction.DamageType == DamageType.Physical)
+        if (attackingAction.IsTrueDamage)
         {
-            defendingAction.DamageTaken = attackingAction.Damage - Physique;
+            defendingAction.DamageTaken = attackingAction.Damage;
         }
-        else if (attackingAction.DamageType == DamageType.Magical)
+        else
         {
-            defendingAction.DamageTaken = (attackingAction.Damage - Resolve);
+            if (attackingAction.DamageType == DamageType.Physical)
+            {
+                defendingAction.DamageTaken = attackingAction.Damage - this.Physique;
+            }
+            else if (attackingAction.DamageType == DamageType.Magical)
+            {
+                defendingAction.DamageTaken = (attackingAction.Damage - Resolve);
+            }
         }
-        
+
         return defendingAction;
     }
 }
