@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using AFamiliarWorld.Bot.Commands.Models;
 using Discord;
 
@@ -24,9 +25,16 @@ public class Familiar
     
     private List<StatusCondition> StatusConditions = new List<StatusCondition>();
     
+    [JsonIgnore]
+    public List<Ability> Abilities { get; set; }
+    
     public Familiar()
     {
         FamiliarID = Guid.NewGuid().ToString();
+    }
+    public async Task<List<Ability>> GetAbilities()
+    {
+        return Abilities;
     }
 
     public async Task<List <StatusCondition>> GetStatusConditions()
@@ -97,6 +105,7 @@ public class Familiar
         {
             cutie = "Beautiful";
         }
+
         var embed = new EmbedBuilder()
             .WithTitle(cutie + " " + Name)
             .WithDescription(Description)
@@ -109,9 +118,12 @@ public class Familiar
             .AddField("Luck", Luck, inline: true)
             .AddField("Health", Health, inline: true)
             .AddField("Speed", Speed, inline: true)
-            .WithFooter(Quip)
-            .Build(); // Build returns a Discord.Embed object
-        return embed;
+            .WithFooter(Quip);
+        foreach (var ability in this.Abilities)
+        {
+            embed.WithFields().AddField(ability.Title, ability.Value);
+        }
+        return embed.Build();
     }
 
     public virtual async Task<FamiliarAttackingAction> Attack()
