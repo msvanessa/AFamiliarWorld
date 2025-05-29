@@ -7,10 +7,13 @@ namespace AFamiliarWorld.Bot.Familiars;
 public class Familiar
 {
     public string Name { get; set; }
+    [JsonIgnore] 
     public string Description { get; set; }
-    public string Avatar { get; set; }
+    [JsonIgnore] 
     public string Quip { get; set; }
+    [JsonIgnore] 
     public uint Color { get; set; }
+    [JsonIgnore] 
     public string Url { get; set; }
     public int Power { get; set; }
     public int Physique { get; set; }
@@ -24,8 +27,9 @@ public class Familiar
     public bool ActiveFamiliar { get; set; } = false;
     
     private List<StatusCondition> StatusConditions = new List<StatusCondition>();
-    
-    private List<StatusCondition> StatusConditions = new List<StatusCondition>();
+
+    [JsonIgnore] 
+    public List<Ability> Abilities { get; set; } = new List<Ability>();
     
     public Familiar()
     {
@@ -140,10 +144,7 @@ public class Familiar
             }
         }
 
-        var defendingAction = new FamiliarDefendingAction()
-        {
-            
-        };
+        var defendingAction = new FamiliarDefendingAction();
         if (attackingAction.IsTrueDamage)
         {
             defendingAction.DamageTaken = attackingAction.Damage;
