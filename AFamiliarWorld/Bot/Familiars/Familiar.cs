@@ -121,6 +121,28 @@ public class Familiar
 
     public virtual async Task<FamiliarDefendingAction> Defend(FamiliarAttackingAction attackingAction)
     {
-        return null;
+        if (attackingAction.StatusConditions != null)
+        {
+            foreach (var statusCondition in attackingAction.StatusConditions)
+            {
+                await this.AddStatusCondition(statusCondition);
+            }
+        }
+
+        var defendingAction = new FamiliarDefendingAction()
+        {
+            
+        };
+        
+        if (attackingAction.DamageType == DamageType.Physical)
+        {
+            defendingAction.DamageTaken = attackingAction.Damage - Physique;
+        }
+        else if (attackingAction.DamageType == DamageType.Magical)
+        {
+            defendingAction.DamageTaken = (attackingAction.Damage - Resolve);
+        }
+        
+        return defendingAction;
     }
 }

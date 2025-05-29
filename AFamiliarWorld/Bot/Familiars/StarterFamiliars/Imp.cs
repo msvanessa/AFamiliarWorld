@@ -105,31 +105,4 @@ public class Imp:Familiar
         var randomAbility = actions[random.Next(actions.Count)];
         return await randomAbility.Invoke();
     }
-
-    public override async Task<FamiliarDefendingAction> Defend(FamiliarAttackingAction attackingAction)
-    {
-        if (attackingAction.StatusConditions != null)
-        {
-            foreach (var statusCondition in attackingAction.StatusConditions)
-            {
-                await this.AddStatusCondition(statusCondition);
-            }
-        }
-
-        var defendingAction = new FamiliarDefendingAction()
-        {
-            
-        };
-        
-        if (attackingAction.DamageType == DamageType.Physical)
-        {
-            defendingAction.DamageTaken = attackingAction.Damage - Physique;
-        }
-        else if (attackingAction.DamageType == DamageType.Magical)
-        {
-            defendingAction.DamageTaken = (attackingAction.Damage - Resolve);
-        }
-        
-        return defendingAction;
-    }
 }
