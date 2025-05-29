@@ -89,15 +89,25 @@ public class FamiliarBattles
                     var secondAttackerIsWinner = await DoTurn(secondAttacker, firstAttacker, secondAttackerUser, firstAttackerUser, embed, reply, Context);
                     if (secondAttackerIsWinner) break;
                     
-                    await CheckStatusCondition(firstAttacker, firstAttackerUser, embed);
-                    await CheckStatusCondition(secondAttacker, secondAttackerUser, embed);
+                    await CheckStatusCondition(firstAttacker, firstAttackerUser, embed, reply);
+                    await CheckStatusCondition(secondAttacker, secondAttackerUser, embed, reply);
                     
                     var firstWinner = CheckWinner(Context, firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser);
                     if (firstWinner) break;
                     
                     var secondWinner = CheckWinner(Context, secondAttacker, secondAttackerUser, firstAttacker, firstAttackerUser);
                     if (secondWinner) break;
-                    
+                    if (embed.Fields.Count > 20)
+                    {
+                        embed = new EmbedBuilder();
+                        embed.WithColor(Discord.Color.Red);
+                        embed.WithThumbnailUrl(
+                            "https://cdn.discordapp.com/attachments/803309924746395691/1376828611625226351/vs-or-versus-sign-competition-symbol-vector.jpg?ex=6836bf11&is=68356d91&hm=63c3f47d344d24890ab6e3b91b8ad8ec4f4587ea081d8ad831e4ac88350fcb01&");
+                        embed.WithTitle(
+                            $"{Context.User.Username}'s {activeFamiliar.Name} :crossed_swords: {user.Username}'s {opponentActiveFamiliar.Name}");
+                        reply = await Context.Channel.SendMessageAsync(embed: embed.Build());
+                    }
+
                     await Task.Delay(3000);
                 }
             }
@@ -109,39 +119,50 @@ public class FamiliarBattles
 
         private static async Task<bool> DoTurn(Familiar firstAttacker, Familiar secondAttacker, SocketUser firstAttackerUser, SocketUser secondAttackerUser, EmbedBuilder embed, RestUserMessage reply, SocketCommandContext context)
         {
-            var secondAttackerStatusConditions = await secondAttacker.GetStatusConditions();
-            if (!secondAttackerStatusConditions.Contains(StatusCondition.Stun))
+            var firstAttackerStatusConditions = await firstAttacker.GetStatusConditions();
+            if (!firstAttackerStatusConditions.Contains(StatusCondition.Stun))
             {
-                var attack = await secondAttacker.Attack();
-                var defend = await firstAttacker.Defend(attack);
-                firstAttacker.Health -= defend;
+                var attack = await firstAttacker.Attack();
+                var defend = await secondAttacker.Defend(attack);
+                secondAttacker.Health -= defend;
                 var criticalHit = attack.CriticalHit == true ? "***" : "";
 
                 embed.WithFields().AddField(
-                    $"{criticalHit}{secondAttackerUser.Username}'s {secondAttacker.Name} attacks {firstAttackerUser.Username}'s {firstAttacker.Name} with {attack.AbilityName} for {defend} damage!{criticalHit}",
-                    $"{firstAttackerUser.Username}'s {firstAttacker.Name} has {firstAttacker.Health} health remaining.");
+                    $"{criticalHit}{firstAttackerUser.Username}'s {firstAttacker.Name} attacks {secondAttackerUser.Username}'s {secondAttacker.Name} with {attack.AbilityName} for {defend} damage!{criticalHit}",
+                    $"{secondAttackerUser.Username}'s {secondAttacker.Name} has {secondAttacker.Health} health remaining.");
                 await reply.ModifyAsync(
                     new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
-                var winner = CheckWinner(context, secondAttacker, secondAttackerUser, firstAttacker, firstAttackerUser);
+                var winner = CheckWinner(context, firstAttacker, secondAttackerUser, secondAttacker, secondAttackerUser);
                 return winner;
             }
             else
             {
-                embed.WithFields().AddField("Stunned!", $"{secondAttackerUser.Username}'s {secondAttacker.Name} is stunned and cannot attack this turn.");
-                await secondAttacker.RemoveStatusCondition(StatusCondition.Stun);
+                embed.WithFields().AddField("Stunned!", $"{firstAttackerUser.Username}'s {firstAttacker.Name} is stunned and cannot attack this turn.");
+                await reply.ModifyAsync(
+                    new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
+                await firstAttacker.RemoveStatusCondition(StatusCondition.Stun);
             }
 
             return false;
         }
-        private static async Task CheckStatusCondition(Familiar familiar, SocketUser user, EmbedBuilder embed)
+        private static async Task CheckStatusCondition(Familiar familiar, SocketUser user, EmbedBuilder embed, RestUserMessage reply)
         {
-            foreach (var statusCondition in await familiar.GetStatusConditions())
+            foreach (var statusCondition in (await familiar.GetStatusConditions()).Distinct())
             {
                 switch (statusCondition)
                 {
                     case StatusCondition.Burn:
                         familiar.Health -= 2;
                         embed.WithFields().AddField($"{user.Username}'s {familiar.Name} is burning! They take 2 fire damage.", $"{user.Username}'s {familiar.Name} has {familiar.Health} health remaining.");
+                        await reply.ModifyAsync(
+                            new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
+                        break;
+                    case StatusCondition.Poison:
+                        var damage = (await familiar.GetStatusConditions()).Count(s=>s == StatusCondition.Poison);
+                        familiar.Health -= damage;
+                        embed.WithFields().AddField($"{user.Username}'s {familiar.Name} is poisoned! They take {damage} poison damage.", $"{user.Username}'s {familiar.Name} has {familiar.Health} health remaining.");
+                        await reply.ModifyAsync(
+                            new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
                         break;
                     case StatusCondition.None:
                         break;

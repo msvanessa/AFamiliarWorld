@@ -4,5 +4,6 @@ public enum StatusCondition
 {
     Burn,
     Stun,
+    Poison,
     None
 }

@@ -26,7 +26,15 @@ public class FamiliarManagement
                 var random = new Random();
                 var player = new Player.Player();
                 player.familiars = new List<Familiar>();
-
+                
+                // DELETEME
+                var DELETEME = new List<Type>(){typeof(Imp), typeof(PaperCraneGolem), typeof(CrystalBeetle), typeof(Batnana), typeof(BookMimic), typeof(Clockroach), typeof(LandShork), typeof(NoodleCrab), typeof(Pebblewyrm), typeof(Ropopus), typeof(SkeleMouse), typeof(SlimeCat), typeof(StarRaven)};
+                foreach (var fam in DELETEME)
+                {
+                    player.familiars.Add((Familiar) Activator.CreateInstance(fam));
+                }
+                // DELETEME
+                
                 var familiar = (Familiar) Activator.CreateInstance(StarterFamiliars[random.Next(0, StarterFamiliars.Count)]);
                 player.familiars.Add(familiar);
                 ReplyAsync(embed:familiar.Display());
@@ -101,7 +109,6 @@ public class FamiliarManagement
         [Summary("Sets your active familiar")]
         public async Task SetActiveFamiliarAsync(string familiarID)
         {
-            string filePath = Context.User.Id + ".json";
             var player = FileManager.FetchUserData(Context.User.Id);
             if (player == null)
             {
