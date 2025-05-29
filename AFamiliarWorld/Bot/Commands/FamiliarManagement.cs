@@ -1,5 +1,6 @@
 using System.Text;
 using AFamiliarWorld.Bot.Familiars;
+using AFamiliarWorld.Bot.Familiars.StarterFamiliars;
 using Discord.Commands;
 using Newtonsoft.Json;
 

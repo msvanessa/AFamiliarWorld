@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using AFamiliarWorld.Bot.Commands.Models;
 using Discord;
 
@@ -6,10 +7,13 @@ namespace AFamiliarWorld.Bot.Familiars;
 public class Familiar
 {
     public string Name { get; set; }
+    [JsonIgnore] 
     public string Description { get; set; }
-    public string Avatar { get; set; }
+    [JsonIgnore] 
     public string Quip { get; set; }
+    [JsonIgnore] 
     public uint Color { get; set; }
+    [JsonIgnore] 
     public string Url { get; set; }
     public int Power { get; set; }
     public int Physique { get; set; }
@@ -23,10 +27,17 @@ public class Familiar
     public bool ActiveFamiliar { get; set; } = false;
     
     private List<StatusCondition> StatusConditions = new List<StatusCondition>();
+
+    [JsonIgnore] 
+    public List<Ability> Abilities { get; set; } = new List<Ability>();
     
     public Familiar()
     {
         FamiliarID = Guid.NewGuid().ToString();
+    }
+    public async Task<List<Ability>> GetAbilities()
+    {
+        return Abilities;
     }
 
     public async Task<List <StatusCondition>> GetStatusConditions()
@@ -97,6 +108,7 @@ public class Familiar
         {
             cutie = "Beautiful";
         }
+
         var embed = new EmbedBuilder()
             .WithTitle(cutie + " " + Name)
             .WithDescription(Description)
@@ -109,18 +121,46 @@ public class Familiar
             .AddField("Luck", Luck, inline: true)
             .AddField("Health", Health, inline: true)
             .AddField("Speed", Speed, inline: true)
-            .WithFooter(Quip)
-            .Build(); // Build returns a Discord.Embed object
-        return embed;
+            .WithFooter(Quip);
+        foreach (var ability in this.Abilities)
+        {
+            embed.WithFields().AddField(ability.Title, ability.Value);
+        }
+        return embed.Build();
     }
 
-    public virtual async Task<FamiliarAction> Attack()
+    public virtual async Task<FamiliarAttackingAction> Attack()
     {
         return null;
     }
 
-    public virtual async Task<int> Defend(FamiliarAction action)
+    public virtual async Task<FamiliarDefendingAction> Defend(FamiliarAttackingAction attackingAction)
     {
-        return -1;
+        if (attackingAction.StatusConditions != null)
+        {
+            foreach (var statusCondition in attackingAction.StatusConditions)
+            {
+                await this.AddStatusCondition(statusCondition);
+            }
+        }
+
+        var defendingAction = new FamiliarDefendingAction();
+        if (attackingAction.IsTrueDamage)
+        {
+            defendingAction.DamageTaken = attackingAction.Damage;
+        }
+        else
+        {
+            if (attackingAction.DamageType == DamageType.Physical)
+            {
+                defendingAction.DamageTaken = attackingAction.Damage - this.Physique;
+            }
+            else if (attackingAction.DamageType == DamageType.Magical)
+            {
+                defendingAction.DamageTaken = (attackingAction.Damage - Resolve);
+            }
+        }
+
+        return defendingAction;
     }
 }

@@ -1,21 +1,21 @@
 using AFamiliarWorld.Bot.Commands.Models;
 
-namespace AFamiliarWorld.Bot.Familiars;
+namespace AFamiliarWorld.Bot.Familiars.StarterFamiliars;
 
 public class Imp:Familiar
 {
     private int MaxHealth = 40;
-    private List<Func<Task<FamiliarAction>>> actions;
+    private List<Func<Task<FamiliarAttackingAction>>> actions;
     public Imp()
     {
-        
-        this.actions = new List<Func<Task<FamiliarAction>>>
+        this.actions = new List<Func<Task<FamiliarAttackingAction>>>
         {
             Fireball,
             Scratch,
             Sting,
             WingFlap
         };
+        
         var random = new Random();
         this.Name = "Imp";
         this.Description = "Hehe grumble grumble";
@@ -33,42 +33,49 @@ public class Imp:Familiar
         this.Health = MaxHealth;
         this.Speed = 1;
         this.Cuteness = random.Next(1, 10001);
+        
+        this.Abilities.Add(new Ability("Spell: Fireball", $"A fiery attack that deals {this.Physique}+1d4 damage and has a 20% chance to burn the target."));
+        this.Abilities.Add(new Ability("Spell: Scratch", $"A physical attack that deals {this.Physique}+1d4 damage."));
+        this.Abilities.Add(new Ability("Spell: Sting", $"A physical attack that deals 2 true damage and poisons the target."));
+        this.Abilities.Add(new Ability("Spell: Wing Flap", $"A magical attack that deals 0 damage and clears all status conditions, transfering them to the target."));
     }
 
-    public async Task<FamiliarAction> WingFlap()
+    public async Task<FamiliarAttackingAction> WingFlap()
     {
-        var action = new FamiliarAction()
+        var action = new FamiliarAttackingAction()
         {
             AbilityName = "Wing flap",
             Damage = 0,
             CriticalHit = false,
             DamageType = DamageType.Magical,
-            StatusConditions = (await this.GetStatusConditions()).ToList()
+            StatusConditions = (await this.GetStatusConditions()).ToList(),
+            IsTrueDamage = true
         };
 
         await this.ClearStatusConditions();
         return action;
     }
 
-    public async Task<FamiliarAction> Sting()
+    public async Task<FamiliarAttackingAction> Sting()
     {
         var random = new Random();
         var crit = random.Next(1, 101) < this.Luck;
-        var action = new FamiliarAction()
+        var action = new FamiliarAttackingAction()
         {
             AbilityName = "Sting",
             Damage = crit ? 4:2,
             CriticalHit = random.Next(1, 101) < this.Luck,
             DamageType = DamageType.Physical,
-            StatusConditions = new List<StatusCondition>() { StatusCondition.Poison }
+            StatusConditions = new List<StatusCondition>() { StatusCondition.Poison },
+            IsTrueDamage = true
         };
         return action;
     }
     
-    public async Task<FamiliarAction> Fireball()
+    public async Task<FamiliarAttackingAction> Fireball()
     {
         var random = new Random();
-        var action = new FamiliarAction();
+        var action = new FamiliarAttackingAction();
         action.AbilityName = "Imp Firebol";
         int crit = random.Next(1, 101) < Luck ? 2 : 1;
         if (crit == 2)
@@ -85,10 +92,10 @@ public class Imp:Familiar
         return action;
     }
     
-    public async Task<FamiliarAction> Scratch()
+    public async Task<FamiliarAttackingAction> Scratch()
     {
         var random = new Random();
-        var action = new FamiliarAction();
+        var action = new FamiliarAttackingAction();
         action.AbilityName = "Imp Scratch";
         int crit = random.Next(1, 101) < Luck ? 2 : 1;
         if (crit == 2)
@@ -99,35 +106,10 @@ public class Imp:Familiar
         action.DamageType = DamageType.Physical;
         return action;
     }
-    public override async Task<FamiliarAction> Attack()
+    public override async Task<FamiliarAttackingAction> Attack()
     {
         var random = new Random();
         var randomAbility = actions[random.Next(actions.Count)];
         return await randomAbility.Invoke();
-    }
-
-    public override async Task<int> Defend(FamiliarAction action)
-    {
-        if (action.StatusConditions != null)
-        {
-            foreach (var statusCondition in action.StatusConditions)
-            {
-                await this.AddStatusCondition(statusCondition);
-            }
-        }
-        int damage = -100;
-        if (action.DamageType == DamageType.Physical)
-        {
-            damage = action.Damage - Physique;
-        }
-        else if (action.DamageType == DamageType.Magical)
-        {
-            damage = (action.Damage - Resolve);
-        }
-        if (damage < 1)
-        {
-            damage = 1;
-        }
-        return damage;
     }
 }

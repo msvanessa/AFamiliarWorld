@@ -64,23 +64,18 @@ public class FamiliarBattles
                 embed.WithTitle($"{Context.User.Username}'s {activeFamiliar.Name} :crossed_swords: {user.Username}'s {opponentActiveFamiliar.Name}");
                 var reply = await Context.Channel.SendMessageAsync(embed: embed.Build());
                 
-                var random = new Random();
-                var firstAttackerUser = activeFamiliar.Speed >= opponentActiveFamiliar.Speed ? Context.User : user;
-                var secondAttackerUser = activeFamiliar.Speed >= opponentActiveFamiliar.Speed ? Context.User : user;
-                var firstAttacker = activeFamiliar.Speed >= opponentActiveFamiliar.Speed ? activeFamiliar : opponentActiveFamiliar;
-                var secondAttacker = activeFamiliar.Speed >= opponentActiveFamiliar.Speed ? activeFamiliar : opponentActiveFamiliar;
-
-                if (firstAttacker == secondAttacker)
+                var (firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser) = await CalculateSpeed(activeFamiliar, Context.User, opponentActiveFamiliar, user);
+                var firstAttackerSpeed = firstAttacker.Speed;
+                var secondAttackerSpeed = secondAttacker.Speed;
+                while (true)
                 {
-                    var goingfirst = random.Next(1, 3);
-                    firstAttacker = goingfirst == 1 ? activeFamiliar : opponentActiveFamiliar;
-                    firstAttackerUser = goingfirst == 1 ? Context.User : user;
-                    secondAttacker = goingfirst == 2 ? activeFamiliar : opponentActiveFamiliar;
-                    secondAttackerUser = goingfirst == 2 ? Context.User : user;
-                }
-
-                while (firstAttacker.Health >= 0 && secondAttacker.Health >= 0)
-                {
+                    if (firstAttacker.Speed != firstAttackerSpeed || secondAttacker.Speed != secondAttackerSpeed) // If the speed of either familiar changes, recalculate the turn order
+                    {
+                        (firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser) = await CalculateSpeed(activeFamiliar, Context.User, opponentActiveFamiliar, user);
+                        firstAttackerSpeed = firstAttacker.Speed;
+                        secondAttackerSpeed = secondAttacker.Speed;
+                    }
+                    
                     var firstAttackerIsWinner = await DoTurn(firstAttacker, secondAttacker, firstAttackerUser, secondAttackerUser, embed, reply, Context);
                     if (firstAttackerIsWinner) break;
                     
@@ -117,6 +112,24 @@ public class FamiliarBattles
             }
         }
 
+        private static async Task<(Familiar, SocketUser, Familiar, SocketUser)> CalculateSpeed(Familiar challengerFamiliar, SocketUser challengerUser, Familiar challengedFamiliar, SocketUser challengedUser)
+        {
+            var firstAttackerUser = challengerFamiliar.Speed >= challengedFamiliar.Speed ? challengerUser : challengedUser;
+            var secondAttackerUser = challengerFamiliar.Speed >= challengedFamiliar.Speed ? challengerUser : challengedUser;
+            var firstAttacker = challengerFamiliar.Speed >= challengedFamiliar.Speed ? challengerFamiliar : challengedFamiliar;
+            var secondAttacker = challengerFamiliar.Speed >= challengedFamiliar.Speed ? challengerFamiliar : challengedFamiliar;
+            var random = new Random();
+            if (firstAttacker == secondAttacker)
+            {
+                var goingFirst = random.Next(1, 3);
+                firstAttacker = goingFirst == 1 ? challengerFamiliar : challengedFamiliar;
+                firstAttackerUser = goingFirst == 1 ? challengerUser : challengedUser;
+                secondAttacker = goingFirst == 2 ? challengerFamiliar : challengedFamiliar;
+                secondAttackerUser = goingFirst == 2 ? challengerUser : challengedUser;
+            }
+            return (firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser);
+        }
+        
         private static async Task<bool> DoTurn(Familiar firstAttacker, Familiar secondAttacker, SocketUser firstAttackerUser, SocketUser secondAttackerUser, EmbedBuilder embed, RestUserMessage reply, SocketCommandContext context)
         {
             var firstAttackerStatusConditions = await firstAttacker.GetStatusConditions();
@@ -124,15 +137,25 @@ public class FamiliarBattles
             {
                 var attack = await firstAttacker.Attack();
                 var defend = await secondAttacker.Defend(attack);
-                secondAttacker.Health -= defend;
+                secondAttacker.Health -= defend.DamageTaken;
+                
                 var criticalHit = attack.CriticalHit == true ? "***" : "";
-
                 embed.WithFields().AddField(
-                    $"{criticalHit}{firstAttackerUser.Username}'s {firstAttacker.Name} attacks {secondAttackerUser.Username}'s {secondAttacker.Name} with {attack.AbilityName} for {defend} damage!{criticalHit}",
+                    $"{criticalHit}{firstAttackerUser.Username}'s {firstAttacker.Name} attacks {secondAttackerUser.Username}'s {secondAttacker.Name} with {attack.AbilityName} for {defend.DamageTaken} damage!{criticalHit}",
                     $"{secondAttackerUser.Username}'s {secondAttacker.Name} has {secondAttacker.Health} health remaining.");
                 await reply.ModifyAsync(
                     new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
                 var winner = CheckWinner(context, firstAttacker, secondAttackerUser, secondAttacker, secondAttackerUser);
+                if (winner) return winner;
+                
+                if (defend.IsReflecting)
+                {
+                    firstAttacker.Health -= defend.DamageReflected;
+                    embed.WithFields().AddField(
+                        $"{firstAttackerUser.Username}'s {firstAttacker.Name} reflects {defend.DamageReflected} damage back to {secondAttackerUser.Username}'s {secondAttacker.Name} using its {defend.DamageReflectedMessage}!",
+                        $"{secondAttackerUser.Username}'s {secondAttacker.Name} has {secondAttacker.Health} health remaining.");
+                }
+                winner = CheckWinner(context, secondAttacker, firstAttackerUser, firstAttacker, firstAttackerUser);
                 return winner;
             }
             else
@@ -205,7 +228,5 @@ public class FamiliarBattles
 
             return completedTask == tcs.Task ? await tcs.Task : null;
         }
-        
     }
-    
 }

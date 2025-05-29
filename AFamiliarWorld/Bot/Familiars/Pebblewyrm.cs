@@ -4,11 +4,11 @@ namespace AFamiliarWorld.Bot.Familiars;
 
 public class Pebblewyrm:Familiar
 {
-    private List<Func<Task<FamiliarAction>>> actions;
+    private List<Func<Task<FamiliarAttackingAction>>> actions;
     private int MaxHealth = 40;
     public Pebblewyrm()
     {
-        this.actions = new List<Func<Task<FamiliarAction>>>
+        this.actions = new List<Func<Task<FamiliarAttackingAction>>>
         {
             PebblewyrmAttack
         };
@@ -30,16 +30,16 @@ public class Pebblewyrm:Familiar
         this.Speed = 1;
         this.Cuteness = random.Next(1, 10001);
     }
-    public override async Task<FamiliarAction> Attack()
+    public override async Task<FamiliarAttackingAction> Attack()
     {
         var random = new Random();
         var randomAbility = actions[random.Next(actions.Count)];
         return await randomAbility.Invoke();
     }
-    public async Task<FamiliarAction> PebblewyrmAttack()
+    public async Task<FamiliarAttackingAction> PebblewyrmAttack()
     {
         var random = new Random();
-        var action = new FamiliarAction();
+        var action = new FamiliarAttackingAction();
         action.AbilityName = "Pebblewyrm Attack";
         int crit = random.Next(1, 101) < Luck ? 2 : 1;
         if (crit == 2)
@@ -49,30 +49,5 @@ public class Pebblewyrm:Familiar
         action.Damage = (Power + random.Next(1, 5)) * (crit);
         action.DamageType = DamageType.Physical;
         return action;
-    }
-
-    public override async Task<int> Defend(FamiliarAction action)
-    {
-        if (action.StatusConditions != null)
-        {
-            foreach (var statusCondition in action.StatusConditions)
-            {
-                await this.AddStatusCondition(statusCondition);
-            }
-        }
-        int damage = -100;
-        if (action.DamageType == DamageType.Physical)
-        {
-            damage = action.Damage - Physique;
-        }
-        else if (action.DamageType == DamageType.Magical)
-        {
-            damage = (action.Damage - Resolve);
-        }
-        if (damage < 1)
-        {
-            damage = 1;
-        }
-        return damage;
     }
 }

@@ -5,11 +5,11 @@ namespace AFamiliarWorld.Bot.Familiars;
 
 public class CrystalBeetle:Familiar
 {
-    private List<Func<Task<FamiliarAction>>> actions;
+    private List<Func<Task<FamiliarAttackingAction>>> actions;
     private int MaxHealth = 40;
     public CrystalBeetle()
     {
-        this.actions = new List<Func<Task<FamiliarAction>>>
+        this.actions = new List<Func<Task<FamiliarAttackingAction>>>
         {
             BeetleBonk,
             Slam
@@ -33,17 +33,17 @@ public class CrystalBeetle:Familiar
         this.Cuteness = Math.Min(random.Next(1, 10001), random.Next(1, 10001));
     }
     
-    public override async Task<FamiliarAction> Attack()
+    public override async Task<FamiliarAttackingAction> Attack()
     {
         var random = new Random();
         var randomAbility = actions[random.Next(actions.Count)];
         return await randomAbility.Invoke();
     }
 
-    public async Task<FamiliarAction> BeetleBonk()
+    public async Task<FamiliarAttackingAction> BeetleBonk()
     {
         var random = new Random();
-        var action = new FamiliarAction();
+        var action = new FamiliarAttackingAction();
         action.AbilityName = "Beetle Bonk";
         int crit = random.Next(1, 101) < Luck ? 2 : 1;
         if (crit == 2)
@@ -55,39 +55,13 @@ public class CrystalBeetle:Familiar
         return action;
     }
 
-    public async Task<FamiliarAction> Slam()
+    public async Task<FamiliarAttackingAction> Slam()
     {
-        var action = new FamiliarAction();
+        var action = new FamiliarAttackingAction();
         action.AbilityName = "Slam";
         action.Damage = 1;
         action.DamageType = DamageType.Physical;
         action.StatusConditions = new List<StatusCondition>{StatusCondition.Stun};
         return action;
-    }
-
-    public override async Task<int> Defend(FamiliarAction action)
-    {
-        if (action.StatusConditions != null)
-        {
-            foreach (var statusCondition in action.StatusConditions)
-            {
-                await this.AddStatusCondition(statusCondition);
-            }
-        }
-
-        int damage = -100;
-        if (action.DamageType == DamageType.Physical)
-        {
-            damage = action.Damage - Physique;
-        }
-        else if (action.DamageType == DamageType.Magical)
-        {
-            damage = (action.Damage - Resolve);
-        }
-        if (damage < 1)
-        {
-            damage = 1;
-        }
-        return damage;
     }
 }
