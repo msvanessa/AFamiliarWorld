@@ -25,8 +25,7 @@ public class Familiar
     
     private List<StatusCondition> StatusConditions = new List<StatusCondition>();
     
-    [JsonIgnore]
-    public List<Ability> Abilities { get; set; }
+    private List<StatusCondition> StatusConditions = new List<StatusCondition>();
     
     public Familiar()
     {
