@@ -20,11 +20,11 @@ public class PaperCraneGolem:Familiar
         this.Quip = "*Does the robot*";
         this.Color = 0xb66d34;
         this.Url = "https://cdn.discordapp.com/attachments/1246170699362729995/1375184022317039677/assets_task_01jvwn8e9bejabs40h4cag97ft_1747939803_img_1.webp?ex=68316c2c&is=68301aac&hm=fd421e630543b8d6e3601d4223cd4070d7e4a7083c579df74e450c0ac1cddcbc&";
-        this.Power = 8;
+        this.Power = 3;
         this.Physique = 4;
         
-        this.Willpower = 2;
-        this.Resolve = 7;
+        this.Willpower = 3;
+        this.Resolve = 2;
         
         this.Luck = 5;
         

@@ -25,10 +25,10 @@ public class CrystalBeetle:Familiar
         this.Quip = "*Hunkers down*";
         this.Color = 0x34e9d0;
         this.Url = "https://cdn.discordapp.com/attachments/1246170699362729995/1375184355504423063/assets_task_01jvwnaxt0eyzbc2bbb853pmxf_1747939882_img_0.webp?ex=68316c7c&is=68301afc&hm=66a1087f14c1e0cbe2c431e9cff617e260f809df7e5a73b86f88e566330f0e3a&";
-        this.Power = 8;
+        this.Power = 6;
         this.Physique = 4;
         
-        this.Willpower = 8;
+        this.Willpower = 7;
         this.Resolve = 4;
         
         this.Luck = 5;
@@ -41,7 +41,7 @@ public class CrystalBeetle:Familiar
         this.Abilities.Add(new Ability("Spell: Slam", $"A physical attack that deals 1 true damage and stuns the target."));
         this.Abilities.Add(new Ability("Spell: Hunker Down", $"A defensive ability that deals 0 damage, but reduces incoming damage by your Willpower for the next attack."));
         this.Abilities.Add(new Ability("Spell: Prismatic Spark", $"A magical attack that deals {this.Willpower}+1d4 damage. Has a 20% chance to crit."));
-        this.Abilities.Add(new Ability("Spell: Shatter Pulse", $"A magical attack that deals half of {this.Physique}+1d4 physical damage and applies a shatter pulse. The next time you use an attack, it will deal the other half ontop of your regular attack as magical damage."));
+        this.Abilities.Add(new Ability("Spell: Shatter Pulse", $"A magical attack that deals half of {this.Power}+1d4 physical damage and applies a shatter pulse. The next time you use an attack, it will deal the other half ontop of your regular attack as magical damage."));
     }
     
     public override async Task<FamiliarAttackingAction> Attack()
@@ -175,7 +175,7 @@ public class CrystalBeetle:Familiar
             }
             else if (attackingAction.DamageType == DamageType.Magical)
             {
-                defendingAction.DamageTaken = (attackingAction.Damage - Resolve);
+                defendingAction.DamageTaken = ((attackingAction.Damage - Resolve) / 2);
             }
         }
 
