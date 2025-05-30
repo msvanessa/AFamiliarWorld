@@ -18,11 +18,11 @@ public class Pebblewyrm:Familiar
         this.Quip = "*Breathes gravel*";
         this.Color = 0x808080;
         this.Url = "https://media.discordapp.net/attachments/1246170699362729995/1375190944441307277/assets_task_01jvwprr6cfwt8zdrwh2f6td02_1747941436_img_0.webp?ex=6831729e&is=6830211e&hm=63b02e99830de26dbf0f6aa5a6b922c102cc17e1ec78721aa0db4a9b5454f9c1&=&format=webp&width=645&height=968";
-        this.Power = 4;
-        this.Physique = 4;
+        this.Power = 40;
+        this.Physique = 15;
         
-        this.Willpower = 4;
-        this.Resolve = 4;
+        this.Willpower = 40;
+        this.Resolve = 15;
         
         this.Luck = 5;
         
@@ -46,7 +46,7 @@ public class Pebblewyrm:Familiar
         {
             action.CriticalHit = true;
         }
-        action.Damage = (Power + random.Next(1, 5)) * (crit);
+        action.Damage = (Power + random.Next(1, 21)) * (crit);
         action.DamageType = DamageType.Physical;
         return action;
     }

@@ -18,11 +18,11 @@ public class LandShork:Familiar
         this.Quip = "*Monches u*";
         this.Color = 0x1dd3df;
         this.Url = "https://images-ext-1.discordapp.net/external/OmhTzBTivkzoP91kdb1_Dj5jy2ihSsrwRSd0ta8_bBo/%3Fst%3D2025-05-22T18%253A01%253A36Z%26se%3D2025-05-28T19%253A01%253A36Z%26sks%3Db%26skt%3D2025-05-22T18%253A01%253A36Z%26ske%3D2025-05-28T19%253A01%253A36Z%26sktid%3Da48cca56-e6da-484e-a814-9c849652bcb3%26skoid%3D8ebb0df1-a278-4e2e-9c20-f2d373479b3a%26skv%3D2019-02-02%26sv%3D2018-11-09%26sr%3Db%26sp%3Dr%26spr%3Dhttps%252Chttp%26sig%3Dm%252Bn%252BGiME%252BM5zq7cNYxwjHcm3F69NgrgoALnVoGduC90%253D%26az%3Doaivgprodscus/https/videos.openai.com/vg-assets/assets%252Ftask_01jvwrrcrdf15r90xpwzknnd52%252F1747943505_img_2.webp?format=webp&width=645&height=968";
-        this.Power = 4;
-        this.Physique = 4;
+        this.Power = 40;
+        this.Physique = 15;
         
-        this.Willpower = 4;
-        this.Resolve = 4;
+        this.Willpower = 40;
+        this.Resolve = 15;
         
         this.Luck = 5;
         
@@ -46,7 +46,7 @@ public class LandShork:Familiar
         {
             action.CriticalHit = true;
         }
-        action.Damage = (Power + random.Next(1, 5)) * (crit);
+        action.Damage = (Power + random.Next(1, 21)) * (crit);
         action.DamageType = DamageType.Physical;
         return action;
     }

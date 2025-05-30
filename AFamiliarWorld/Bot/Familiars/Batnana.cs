@@ -5,7 +5,7 @@ namespace AFamiliarWorld.Bot.Familiars;
 public class Batnana:Familiar
 {
     private List<Func<Task<FamiliarAttackingAction>>> actions;
-    private int MaxHealth = 40;
+    private int MaxHealth = 320;
     private bool isEvading = false;
     public Batnana()
     {
@@ -23,11 +23,11 @@ public class Batnana:Familiar
         this.Quip = "*Monches 'nana*";
         this.Color = 0xfff940;
         this.Url = "https://images-ext-1.discordapp.net/external/hXFeRnzIiH3xoipky40Dc43yl1Cp74oZ6-I-kDrlyJU/%3Fst%3D2025-05-22T19%253A01%253A17Z%26se%3D2025-05-28T20%253A01%253A17Z%26sks%3Db%26skt%3D2025-05-22T19%253A01%253A17Z%26ske%3D2025-05-28T20%253A01%253A17Z%26sktid%3Da48cca56-e6da-484e-a814-9c849652bcb3%26skoid%3D8ebb0df1-a278-4e2e-9c20-f2d373479b3a%26skv%3D2019-02-02%26sv%3D2018-11-09%26sr%3Db%26sp%3Dr%26spr%3Dhttps%252Chttp%26sig%3DFbAjfUp4i8o%252FLU5%252F6FRJUmWwy%252B%252F5oveMN%252BSz5EUCWPs%253D%26az%3Doaivgprodscus/https/videos.openai.com/vg-assets/assets%252Ftask_01jvwsv4a4fztrxx68g5mkxfdj%252F1747944610_img_3.webp?format=webp&width=645&height=968";
-        this.Power = 4;
-        this.Physique = 3;
+        this.Power = 40;
+        this.Physique = 10;
         
-        this.Willpower = 2;
-        this.Resolve = 3;
+        this.Willpower = 20;
+        this.Resolve = 15;
         
         this.Luck = 5;
         
@@ -35,11 +35,11 @@ public class Batnana:Familiar
         this.Speed = 1;
         this.Cuteness = random.Next(1, 10001);
         
-        this.Abilities.Add(new Ability("Spell: MONCH!", $"A physical attack that deals {this.Power}+1d4 damage and heals 1 health."));
-        this.Abilities.Add(new Ability("Spell: Evasive Flutter", $"A physical attack that deals 0 damage and evades the next attack, reflecting 2 damage back to the attacker."));
-        this.Abilities.Add(new Ability("Spell: Potassium Surge", $"A physical attack that deals 0 damage and increases the Batnana's Willpower and Power by 1."));
-        this.Abilities.Add(new Ability("Spell: FruitfulShriek", $"A physical attack that deals 1 true damage and stuns the target."));
-        this.Abilities.Add(new Ability("Spell: Scritchies", $"A physical attack that deals 2 true damage and causes the target to bleed."));
+        this.Abilities.Add(new Ability("Spell: MONCH!", $"A physical attack that deals {this.Power}+1d20 damage and heals 10 health."));
+        this.Abilities.Add(new Ability("Spell: Evasive Flutter", $"A physical attack that deals 0 damage and evades the next attack, reflecting 20 damage back to the attacker."));
+        this.Abilities.Add(new Ability("Spell: Potassium Surge", $"A physical attack that deals 0 damage and increases the Batnana's Willpower and Power by 10."));
+        this.Abilities.Add(new Ability("Spell: FruitfulShriek", $"A physical attack that deals 10 true damage and stuns the target."));
+        this.Abilities.Add(new Ability("Spell: Scritchies", $"A physical attack that deals 20 true damage and causes the target to bleed."));
     }
     public override async Task<FamiliarAttackingAction> Attack()
     {
@@ -60,10 +60,10 @@ public class Batnana:Familiar
 
         if (!(await this.GetStatusConditions()).Contains(StatusCondition.Bleed))
         {
-            this.Health += 1;
+            this.Health += 10;
         }
 
-        action.Damage = (Power + random.Next(1, 5)) * (crit);
+        action.Damage = (Power + random.Next(1, 21)) * (crit);
         action.DamageType = DamageType.Physical;
         return action;
     }
@@ -86,8 +86,8 @@ public class Batnana:Familiar
         action.AbilityName = "Potassium Surge";
         action.Damage = 0;
         action.DamageType = DamageType.Physical;
-        this.Willpower += 1;
-        this.Power += 1;
+        this.Willpower += 10;
+        this.Power += 10;
         return action;
     }
     
@@ -96,7 +96,7 @@ public class Batnana:Familiar
         var random = new Random();
         var action = new FamiliarAttackingAction();
         action.AbilityName = "Fruitful Shriek";
-        action.Damage = 1;
+        action.Damage = 10;
         action.DamageType = DamageType.Physical;
         action.IsTrueDamage = true;
         action.StatusConditions = new List<StatusCondition>{StatusCondition.Stun};
@@ -108,7 +108,7 @@ public class Batnana:Familiar
         var random = new Random();
         var action = new FamiliarAttackingAction();
         action.AbilityName = "Fruitful Shriek";
-        action.Damage = 2;
+        action.Damage = 20;
         action.DamageType = DamageType.Physical;
         action.IsTrueDamage = true;
         action.StatusConditions = new List<StatusCondition>{StatusCondition.Bleed};
@@ -148,7 +148,7 @@ public class Batnana:Familiar
         {
             defendingAction.DamageTaken = 0;
             defendingAction.IsReflecting = true;
-            defendingAction.DamageReflected = 2;
+            defendingAction.DamageReflected = 20;
             defendingAction.DamageReflectedMessage = "Evasive Flutter";
         }
 

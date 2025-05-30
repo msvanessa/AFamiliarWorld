@@ -18,11 +18,11 @@ public class StarRaven:Familiar
         this.Quip = "*Flaps wings*";
         this.Color = 0x1000cd;
         this.Url = "https://media.discordapp.net/attachments/1246170699362729995/1375187492122398801/assets_task_01jvwnzsjvex2srn2tp25bzwh6_1747940621_img_3.webp?ex=68316f67&is=68301de7&hm=4084f349fb3c322008af44558140031caff771e10a9b77e1ef18231f6697b77e&=&format=webp&width=645&height=968";
-        this.Power = 4;
-        this.Physique = 4;
+        this.Power = 40;
+        this.Physique = 15;
         
-        this.Willpower = 4;
-        this.Resolve = 4;
+        this.Willpower = 40;
+        this.Resolve = 15;
         
         this.Luck = 5;
         
@@ -46,7 +46,7 @@ public class StarRaven:Familiar
         {
             action.CriticalHit = true;
         }
-        action.Damage = (Power + random.Next(1, 5)) * (crit);
+        action.Damage = (Power + random.Next(1, 21)) * (crit);
         action.DamageType = DamageType.Physical;
         return action;
     }

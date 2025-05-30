@@ -6,7 +6,7 @@ namespace AFamiliarWorld.Bot.Familiars;
 public class CrystalBeetle:Familiar
 {
     private List<Func<Task<FamiliarAttackingAction>>> actions;
-    private int MaxHealth = 40;
+    private int MaxHealth = 400;
     private bool _isHunkeredDown = false;
     private int _shatterPulseDamage = 0;
     public CrystalBeetle()
@@ -25,11 +25,11 @@ public class CrystalBeetle:Familiar
         this.Quip = "*Hunkers down*";
         this.Color = 0x34e9d0;
         this.Url = "https://cdn.discordapp.com/attachments/1246170699362729995/1375184355504423063/assets_task_01jvwnaxt0eyzbc2bbb853pmxf_1747939882_img_0.webp?ex=68316c7c&is=68301afc&hm=66a1087f14c1e0cbe2c431e9cff617e260f809df7e5a73b86f88e566330f0e3a&";
-        this.Power = 6;
-        this.Physique = 4;
+        this.Power = 60;
+        this.Physique = 20;
         
-        this.Willpower = 7;
-        this.Resolve = 4;
+        this.Willpower = 70;
+        this.Resolve = 20;
         
         this.Luck = 5;
         
@@ -38,11 +38,11 @@ public class CrystalBeetle:Familiar
         this.Cuteness = Math.Min(random.Next(1, 10001), random.Next(1, 10001));
         
         this.Abilities.Add(new Ability("Passive: Crystal Shell", $"Takes 50% less magical damage"));
-        this.Abilities.Add(new Ability("Spell: Beetle Bonk", $"A basic physical attack that deals {this.Power}+1d4 damage. Has a 20% chance to crit."));
-        this.Abilities.Add(new Ability("Spell: Slam", $"A physical attack that deals 1 true damage and stuns the target."));
+        this.Abilities.Add(new Ability("Spell: Beetle Bonk", $"A basic physical attack that deals {this.Power}+1d20 damage. Has a 20% chance to crit."));
+        this.Abilities.Add(new Ability("Spell: Slam", $"A physical attack that deals 10 true damage and stuns the target."));
         this.Abilities.Add(new Ability("Spell: Hunker Down", $"A defensive ability that deals 0 damage, but reduces incoming damage by your Willpower for the next attack."));
-        this.Abilities.Add(new Ability("Spell: Prismatic Spark", $"A magical attack that deals {this.Willpower}+1d4 damage. Has a 20% chance to crit."));
-        this.Abilities.Add(new Ability("Spell: Shatter Pulse", $"A magical attack that deals half of {this.Power}+1d4 physical damage and applies a shatter pulse. The next time you use an attack, it will deal the other half ontop of your regular attack as magical damage."));
+        this.Abilities.Add(new Ability("Spell: Prismatic Spark", $"A magical attack that deals {this.Willpower}+1d20 damage. Has a 20% chance to crit."));
+        this.Abilities.Add(new Ability("Spell: Shatter Pulse", $"A magical attack that deals half of {this.Power}+1d20 physical damage and applies a shatter pulse. The next time you use an attack, it will deal the other half ontop of your regular attack as magical damage."));
     }
     
     public override async Task<FamiliarAttackingAction> Attack()
@@ -62,7 +62,7 @@ public class CrystalBeetle:Familiar
         {
             action.CriticalHit = true;
         }
-        action.Damage = (Power + random.Next(1, 5)) * (crit);
+        action.Damage = (Power + random.Next(1, 21)) * (crit);
         action.DamageType = DamageType.Physical;
         
         if (this._shatterPulseDamage > 0)
@@ -124,7 +124,7 @@ public class CrystalBeetle:Familiar
             action.Damage = this._shatterPulseDamage;
             this._shatterPulseDamage = 0;
         }
-        var damage = (this.Willpower + random.Next(1, 5)) * (crit);
+        var damage = (this.Willpower + random.Next(1, 21)) * (crit);
         
         action.Damage += damage / 2;
         this._shatterPulseDamage = damage / 2;
@@ -142,7 +142,7 @@ public class CrystalBeetle:Familiar
         {
             action.CriticalHit = true;
         }
-        action.Damage = (this.Willpower + random.Next(1, 5)) * (crit);
+        action.Damage = (this.Willpower + random.Next(1, 21)) * (crit);
         action.DamageType = DamageType.Magical;
         
         if (this._shatterPulseDamage > 0)

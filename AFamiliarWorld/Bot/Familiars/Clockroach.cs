@@ -18,11 +18,11 @@ public class Clockroach:Familiar
         this.Quip = "*Winds you up*";
         this.Color = 0xa75600;
         this.Url = "https://media.discordapp.net/attachments/1246170699362729995/1375190322996580412/assets_task_01jvwpn0mqff4vf7b0de9s151x_1747941299_img_1.webp?ex=6831720a&is=6830208a&hm=2ebf5e6cba5c4784f875f7398494e1a82e1269342cc85746db8f9280230d3407&=&format=webp&width=645&height=968";
-        this.Power = 4;
-        this.Physique = 4;
+        this.Power = 40;
+        this.Physique = 10;
         
-        this.Willpower = 4;
-        this.Resolve = 4;
+        this.Willpower = 40;
+        this.Resolve = 15;
         
         this.Luck = 5;
         
@@ -46,7 +46,7 @@ public class Clockroach:Familiar
         {
             action.CriticalHit = true;
         }
-        action.Damage = (Power + random.Next(1, 5)) * (crit);
+        action.Damage = (Power + random.Next(1, 21)) * (crit);
         action.DamageType = DamageType.Physical;
         return action;
     }

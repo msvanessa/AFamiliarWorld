@@ -4,7 +4,7 @@ namespace AFamiliarWorld.Bot.Familiars;
 
 public class PaperCraneGolem:Familiar
 {
-    private int MaxHealth = 40;
+    private int MaxHealth = 350;
     private List<Func<Task<FamiliarAttackingAction>>> actions;
     public PaperCraneGolem()
     {
@@ -20,11 +20,11 @@ public class PaperCraneGolem:Familiar
         this.Quip = "*Does the robot*";
         this.Color = 0xb66d34;
         this.Url = "https://cdn.discordapp.com/attachments/1246170699362729995/1375184022317039677/assets_task_01jvwn8e9bejabs40h4cag97ft_1747939803_img_1.webp?ex=68316c2c&is=68301aac&hm=fd421e630543b8d6e3601d4223cd4070d7e4a7083c579df74e450c0ac1cddcbc&";
-        this.Power = 3;
-        this.Physique = 4;
+        this.Power = 30;
+        this.Physique = 20;
         
-        this.Willpower = 3;
-        this.Resolve = 2;
+        this.Willpower = 30;
+        this.Resolve = 10;
         
         this.Luck = 5;
         
@@ -48,7 +48,7 @@ public class PaperCraneGolem:Familiar
         {
             action.CriticalHit = true;
         }
-        action.Damage = (Power + random.Next(1, 5) + random.Next(1, 5)) * (crit);
+        action.Damage = (Power + random.Next(1, 21) + random.Next(1, 21)) * (crit);
         action.DamageType = DamageType.Physical;
         return action;
     }
@@ -74,7 +74,7 @@ public class PaperCraneGolem:Familiar
         {
             action.CriticalHit = true;
         }
-        action.Damage = (Willpower + random.Next(1, 7)) * (crit);
+        action.Damage = (Willpower + random.Next(1, 21)) * (crit);
         action.DamageType = DamageType.Magical;
         action.StatusConditions = new List<StatusCondition>() { StatusCondition.Confuse};
         return action;

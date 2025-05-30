@@ -5,7 +5,7 @@ namespace AFamiliarWorld.Bot.Familiars;
 public class Bandcoon:Familiar
 {
     private List<Func<Task<FamiliarAttackingAction>>> actions;
-    private int MaxHealth = 40;
+    private int MaxHealth = 300;
     public Bandcoon()
     {
         this.actions = new List<Func<Task<FamiliarAttackingAction>>>
@@ -21,21 +21,21 @@ public class Bandcoon:Familiar
         this.Quip = "*MINE MINE MINE*";
         this.Color = 0x1dd3df;
         this.Url = "https://cdn.discordapp.com/attachments/1246170699362729995/1377615519489851412/assets_task_01jwd0kxy8e74ty8skmt7nxay8_1748488577_img_0.webp?ex=68399bee&is=68384a6e&hm=0e377038e71fc6f3bdd5e5141f68d611c7c0f2827945eaa9ffe8e4e28a5885d2&";
-        this.Power = 4;
-        this.Physique = 3;
+        this.Power = 40;
+        this.Physique = 15;
         
-        this.Willpower = 4;
-        this.Resolve = 3;
+        this.Willpower = 40;
+        this.Resolve = 15;
         
         this.Luck = 10;
         
         this.Health = MaxHealth;
         this.Speed = 1;
         this.Cuteness = random.Next(1, 10001);
-        this.Abilities.Add(new Ability("Spell: Moneysack", $"Grabs its money sack and attack them with it. Deals 1-5 damage and has a chance to apply any status condition."));
+        this.Abilities.Add(new Ability("Spell: Moneysack", $"Grabs its money sack and attack them with it. Deals 1-30 damage and has a chance to apply any status condition."));
         this.Abilities.Add(new Ability("Spell: Eat trash", $"Eats trash and gains a random stat boost. Can also apply poison to itself."));
-        this.Abilities.Add(new Ability("Spell: Pistol whip", $"Whips them with its pistol. Deals {this.Power}+1d10 damage and has a chance to hit itself for 5 damage."));
-        this.Abilities.Add(new Ability("Spell: Wash food", $"Washes its food and attacks them. Deals {this.Power}+1d5 damage and removes a random status condition from itself."));
+        this.Abilities.Add(new Ability("Spell: Pistol whip", $"Whips them with its pistol. Deals {this.Power}+1d20 damage and has a chance to hit itself for 50 damage."));
+        this.Abilities.Add(new Ability("Spell: Wash food", $"Washes its food and attacks them. Deals {this.Power}+1d20 damage and removes a random status condition from itself."));
     }
     
     public override async Task<FamiliarAttackingAction> Attack()
@@ -60,12 +60,12 @@ public class Bandcoon:Familiar
         {
             new FamiliarAttackingAction()
             {
-                Damage = (Power + random.Next(1, 5)) * (crit),
+                Damage = (Power + random.Next(1, 21)) * (crit),
                 DamageType = DamageType.Physical
             },
             new FamiliarAttackingAction()
             {
-                Damage = (Willpower + random.Next(1, 5)) * (crit),
+                Damage = (Willpower + random.Next(1, 21)) * (crit),
                 DamageType = DamageType.Magical
             },
             new FamiliarAttackingAction()
@@ -124,31 +124,31 @@ public class Bandcoon:Familiar
         switch (option)
         {
             case 0:
-                this.Power += 1;
+                this.Power += 10;
                 break;
             case 1:
-                this.Physique += 1;
+                this.Physique += 10;
                 break;
             case 2:
-                this.Willpower += 1;
+                this.Willpower += 10;
                 break;
             case 3:
-                this.Resolve += 1;
+                this.Resolve += 10;
                 break;
             case 4:
                 this.Luck += 5;
                 break;
             case 5:
-                this.Speed += 1;
+                this.Speed += 10;
                 break;
             case 6:
                 if ((await this.GetStatusConditions()).Contains(StatusCondition.Bleed))
                 {
-                    this.Health += 5;
+                    this.Health += 25;
                 }
                 else
                 {
-                    this.Health += 10;
+                    this.Health += 50;
                 }
 
                 break;
@@ -169,14 +169,14 @@ public class Bandcoon:Familiar
         {
             action.CriticalHit = true;
         }
-        action.Damage = (Power + random.Next(1, 11)) * (crit);
+        action.Damage = (Power + random.Next(1, 31)) * (crit);
         action.DamageType = DamageType.Physical;
 
         if (random.Next(1, 101) < this.Luck)
         {
-            this.Health -= 5;
+            this.Health -= 50;
             action.Damage = 0;
-            action.AbilityName += " (and hits itself instead for 5 damage)";
+            action.AbilityName += " (and hits itself instead for 50 damage)";
         }
         
         return action;
@@ -192,7 +192,7 @@ public class Bandcoon:Familiar
         {
             action.CriticalHit = true;
         }
-        action.Damage = (Power + random.Next(1, 5)) * (crit);
+        action.Damage = (Power + random.Next(1, 41)) * (crit);
         action.DamageType = DamageType.Physical;
         var conditions = await this.GetStatusConditions();
         if (conditions.Count > 0)

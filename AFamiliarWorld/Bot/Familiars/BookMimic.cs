@@ -18,11 +18,11 @@ public class BookMimic:Familiar
         this.Quip = "*Bites u*";
         this.Color = 0xa7743e;
         this.Url = "https://media.discordapp.net/attachments/1246170699362729995/1375188921834668102/assets_task_01jvwpbm43fc7r95023q0ca9ax_1747940954_img_3.webp?ex=683170bc&is=68301f3c&hm=e8e705ab8ca5f2c7eddb82de4b7d355be1330eebe9627a83a34facf63ef911f2&=&format=webp&width=645&height=968";
-        this.Power = 4;
-        this.Physique = 4;
+        this.Power = 40;
+        this.Physique = 10;
         
-        this.Willpower = 4;
-        this.Resolve = 4;
+        this.Willpower = 40;
+        this.Resolve = 15;
         
         this.Luck = 5;
         
@@ -47,7 +47,7 @@ public class BookMimic:Familiar
         {
             action.CriticalHit = true;
         }
-        action.Damage = (Power + random.Next(1, 5)) * (crit);
+        action.Damage = (Power + random.Next(1, 21)) * (crit);
         action.DamageType = DamageType.Physical;
         return action;
     }

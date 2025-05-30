@@ -18,11 +18,11 @@ public class SkeleMouse:Familiar
         this.Quip = "*Brings u smol piece of cheese*";
         this.Color = 0xc7bdbd;
         this.Url = "https://media.discordapp.net/attachments/1246170699362729995/1375185078405173270/assets_task_01jvwng9ypectvwtxbmwcqyx94_1747940061_img_1.webp?ex=68316d28&is=68301ba8&hm=4fb5f179c149b3d623b72afff86a558ab9bed01dba98f24aed7512bb8e6a1d7b&=&format=webp&width=645&height=968";
-        this.Power = 4;
-        this.Physique = 4;
+        this.Power = 40;
+        this.Physique = 15;
         
-        this.Willpower = 4;
-        this.Resolve = 4;
+        this.Willpower = 40;
+        this.Resolve = 15;
         
         this.Luck = 5;
         
@@ -46,7 +46,7 @@ public class SkeleMouse:Familiar
         {
             action.CriticalHit = true;
         }
-        action.Damage = (Power + random.Next(1, 5)) * (crit);
+        action.Damage = (Power + random.Next(1, 21)) * (crit);
         action.DamageType = DamageType.Physical;
         return action;
     }
