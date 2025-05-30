@@ -12,15 +12,15 @@ public class FamiliarManagement
     {
         [Command("createplayer")]
         [Summary("Creates a new player")]
-        public Task CreatePlayerAsync()
+        public async Task CreatePlayerAsync()
         {
             try
             {
                 string filePath = Context.User.Id + ".json";
                 if (File.Exists(filePath))
                 {
-                    ReplyAsync("You already have a character");
-                    return Task.CompletedTask;
+                    await ReplyAsync("You already have a character");
+                    return;
                 }
 
                 List<Type> StarterFamiliars = new List<Type>{typeof(Imp), typeof(PaperCraneGolem), typeof(CrystalBeetle)};
@@ -32,22 +32,25 @@ public class FamiliarManagement
                 var DELETEME = new List<Type>(){typeof(Bandcoon), typeof(Imp), typeof(PaperCraneGolem), typeof(CrystalBeetle), typeof(Batnana), typeof(BookMimic), typeof(Clockroach), typeof(LandShork), typeof(NoodleCrab), typeof(Pebblewyrm), typeof(Ropopus), typeof(SkeleMouse), typeof(SlimeCat), typeof(StarRaven)};
                 foreach (var fam in DELETEME)
                 {
-                    player.familiars.Add((Familiar) Activator.CreateInstance(fam));
+                    var newFamiliar = (Familiar) Activator.CreateInstance(fam);
+                    await newFamiliar.CalculateIVS();
+                    player.familiars.Add(newFamiliar);
                 }
                 // DELETEME
                 
                 var familiar = (Familiar) Activator.CreateInstance(StarterFamiliars[random.Next(0, StarterFamiliars.Count)]);
+                await familiar.CalculateIVS();
                 player.familiars.Add(familiar);
-                ReplyAsync(embed:familiar.Display());
+                await ReplyAsync(embed:familiar.Display());
                 
                 FileManager.SaveUserData(Context.User.Id, player);
-                ReplyAsync("You have successfully created a new character");
+                await ReplyAsync("You have successfully created a new character");
             }
             catch (Exception ex)
             {
-                ReplyAsync(ex.Message);
+                await ReplyAsync(ex.Message);
             }
-            return Task.CompletedTask;
+            return;
         }
 
         [Command("displayfamiliars")]
@@ -100,6 +103,7 @@ public class FamiliarManagement
             }
             else
             {
+                await familiar.CalculateIVS();
                 FileManager.SaveUserData(Context.User.Id, player);
                 await ReplyAsync("You have successfully scavenged a " +  familiar.Name + " and gained " + Gold + " gold!");
                 await ReplyAsync(embed:familiar.Display());

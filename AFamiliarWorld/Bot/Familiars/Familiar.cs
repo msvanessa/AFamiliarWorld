@@ -30,7 +30,18 @@ public class Familiar
 
     [JsonIgnore] 
     public List<Ability> Abilities { get; set; } = new List<Ability>();
-    
+
+    public async Task CalculateIVS()
+    {
+        var random = new Random();
+        this.Power += random.Next(-20, 21);
+        this.Physique += random.Next(-10, 11);
+        this.Willpower += random.Next(-20, 21);
+        this.Resolve += random.Next(-10, 11);
+        this.Health += random.Next(-20, 21);
+        this.Luck += random.Next(0, 6);
+        this.Speed += random.Next(0, 4);
+    }
     public Familiar()
     {
         FamiliarID = Guid.NewGuid().ToString();
