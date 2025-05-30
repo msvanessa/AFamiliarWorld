@@ -19,10 +19,10 @@ public class SlimeCat:Familiar
         this.Color = 0x0ccd00;
         this.Url = "https://media.discordapp.net/attachments/1246170699362729995/1375193634525286622/assets_task_01jvwqea7zfdyv09ke1hzw2dfn_1747942093_img_0.webp?ex=68317520&is=683023a0&hm=990b40abd7341d042ca918904c5663f054e4c0fe2150229c7bf4d17f8bd5753e&=&format=webp&width=645&height=968";
         this.Power = 4;
-        this.Physique = 10;
+        this.Physique = 4;
         
-        this.Willpower = 2;
-        this.Resolve = 7;
+        this.Willpower = 4;
+        this.Resolve = 4;
         
         this.Luck = 5;
         

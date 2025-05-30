@@ -19,10 +19,10 @@ public class SkeleMouse:Familiar
         this.Color = 0xc7bdbd;
         this.Url = "https://media.discordapp.net/attachments/1246170699362729995/1375185078405173270/assets_task_01jvwng9ypectvwtxbmwcqyx94_1747940061_img_1.webp?ex=68316d28&is=68301ba8&hm=4fb5f179c149b3d623b72afff86a558ab9bed01dba98f24aed7512bb8e6a1d7b&=&format=webp&width=645&height=968";
         this.Power = 4;
-        this.Physique = 10;
+        this.Physique = 4;
         
-        this.Willpower = 2;
-        this.Resolve = 7;
+        this.Willpower = 4;
+        this.Resolve = 4;
         
         this.Luck = 5;
         

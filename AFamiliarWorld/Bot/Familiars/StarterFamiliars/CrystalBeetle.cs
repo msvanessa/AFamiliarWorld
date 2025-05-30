@@ -37,6 +37,7 @@ public class CrystalBeetle:Familiar
         this.Speed = 1;
         this.Cuteness = Math.Min(random.Next(1, 10001), random.Next(1, 10001));
         
+        this.Abilities.Add(new Ability("Passive: Crystal Shell", $"Takes 50% less magical damage"));
         this.Abilities.Add(new Ability("Spell: Beetle Bonk", $"A basic physical attack that deals {this.Power}+1d4 damage. Has a 20% chance to crit."));
         this.Abilities.Add(new Ability("Spell: Slam", $"A physical attack that deals 1 true damage and stuns the target."));
         this.Abilities.Add(new Ability("Spell: Hunker Down", $"A defensive ability that deals 0 damage, but reduces incoming damage by your Willpower for the next attack."));

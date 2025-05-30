@@ -19,10 +19,10 @@ public class Clockroach:Familiar
         this.Color = 0xa75600;
         this.Url = "https://media.discordapp.net/attachments/1246170699362729995/1375190322996580412/assets_task_01jvwpn0mqff4vf7b0de9s151x_1747941299_img_1.webp?ex=6831720a&is=6830208a&hm=2ebf5e6cba5c4784f875f7398494e1a82e1269342cc85746db8f9280230d3407&=&format=webp&width=645&height=968";
         this.Power = 4;
-        this.Physique = 10;
+        this.Physique = 4;
         
-        this.Willpower = 2;
-        this.Resolve = 7;
+        this.Willpower = 4;
+        this.Resolve = 4;
         
         this.Luck = 5;
         
