@@ -1,3 +1,5 @@
+using System.Text;
+using AFamiliarWorld.Bot.BattleGenerator;
 using AFamiliarWorld.Bot.Commands.Models;
 using AFamiliarWorld.Bot.Familiars;
 using Discord;
@@ -35,9 +37,10 @@ public class FamiliarBattles
                 
                 await ReplyAsync($"{user.Username} accepted the challenge!");
 
-                var winner = await Dual(Context, user);
+                var pvpImage = new PvPImage();
+                var winner = await Dual(Context, user, pvpImage);
                 if (winner == null) return;
-
+                
                 var winnerPlayer = FileManager.FetchUserData(winner.Id);
                 winnerPlayer.Gold += 50;
                 FileManager.SaveUserData(winner.Id, winnerPlayer);
@@ -46,6 +49,11 @@ public class FamiliarBattles
                 var loserPlayer = FileManager.FetchUserData(loser.Id);
                 loserPlayer.Gold -= 50;
                 FileManager.SaveUserData(loser.Id, loserPlayer);
+                await Context.Channel.SendFileAsync(await pvpImage.CompileMemoryStreams(), "pvp_battle.gif");
+                var fileBytes = Encoding.UTF8.GetBytes(string.Join("\n", debugOutput));
+                var fileStream = new MemoryStream(fileBytes);
+                await Context.Channel.SendFileAsync(fileStream, "debug_output.txt");
+                debugOutput.Clear();
             }
             catch (Exception ex)
             {
@@ -53,89 +61,78 @@ public class FamiliarBattles
             }
         }
 
-        private async Task<SocketUser?> Dual(SocketCommandContext Context, SocketUser user)
-        {
-                            var player = FileManager.FetchUserData(Context.User.Id);
-                var opponent = FileManager.FetchUserData(user.Id);
-                if (player == null || opponent == null)
-                {
-                    await ReplyAsync("One of the players does not have a profile. Please create a profile using the `!createplayer` command.");
-                    return null;
-                }   
-                
-                var activeFamiliar = player.familiars.FirstOrDefault(f => f.ActiveFamiliar);
-                if (activeFamiliar == null)
-                {
-                    await ReplyAsync("You don't have an active familiar");
-                    return null;
-                }
+        private async Task<SocketUser?> Dual(SocketCommandContext Context, SocketUser user, PvPImage pvpImage)
+        { 
+            var player = FileManager.FetchUserData(Context.User.Id);
+            var opponent = FileManager.FetchUserData(user.Id);
+            if (player == null || opponent == null)
+            {
+                await ReplyAsync("One of the players does not have a profile. Please create a profile using the `!createplayer` command.");
+                return null;
+            }   
+            
+            var activeFamiliar = player.familiars.FirstOrDefault(f => f.ActiveFamiliar);
+            if (activeFamiliar == null)
+            {
+                await ReplyAsync("You don't have an active familiar");
+                return null;
+            }
 
-                var opponentActiveFamiliar = opponent.familiars.FirstOrDefault(f => f.ActiveFamiliar);
-                if (opponentActiveFamiliar == null)
+            var opponentActiveFamiliar = opponent.familiars.FirstOrDefault(f => f.ActiveFamiliar);
+            if (opponentActiveFamiliar == null)
+            {
+                await ReplyAsync($"{user.Username} doesn't have an active familiar");
+                return null;
+            }
+            
+            var (firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser) = await CalculateSpeed(activeFamiliar, Context.User, opponentActiveFamiliar, user);
+            var firstAttackerSpeed = firstAttacker.Speed;
+            var secondAttackerSpeed = secondAttacker.Speed;
+            await pvpImage.GeneratePvPImage(firstAttacker, secondAttacker, $"{Context.User.Username}'s {activeFamiliar.Name} VS {user.Username}'s {opponentActiveFamiliar.Name}");
+            while (true)
+            {
+                if (firstAttacker.Speed != firstAttackerSpeed || secondAttacker.Speed != secondAttackerSpeed) // If the speed of either familiar changes, recalculate the turn order
                 {
-                    await ReplyAsync($"{user.Username} doesn't have an active familiar");
-                    return null;
+                    (firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser) = await CalculateSpeed(activeFamiliar, Context.User, opponentActiveFamiliar, user);
+                    firstAttackerSpeed = firstAttacker.Speed;
+                    secondAttackerSpeed = secondAttacker.Speed;
                 }
                 
-                var embed = new EmbedBuilder();
-                embed.WithColor(Discord.Color.Red);
-                embed.WithThumbnailUrl("https://cdn.discordapp.com/attachments/803309924746395691/1376828611625226351/vs-or-versus-sign-competition-symbol-vector.jpg?ex=6836bf11&is=68356d91&hm=63c3f47d344d24890ab6e3b91b8ad8ec4f4587ea081d8ad831e4ac88350fcb01&");
-                embed.WithTitle($"{Context.User.Username}'s {activeFamiliar.Name} :crossed_swords: {user.Username}'s {opponentActiveFamiliar.Name}");
-                var reply = await Context.Channel.SendMessageAsync(embed: embed.Build());
-                
-                var (firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser) = await CalculateSpeed(activeFamiliar, Context.User, opponentActiveFamiliar, user);
-                var firstAttackerSpeed = firstAttacker.Speed;
-                var secondAttackerSpeed = secondAttacker.Speed;
-                while (true)
+                var firstAttackerIsWinner = await DoTurn(firstAttacker, secondAttacker, firstAttacker, secondAttacker, firstAttackerUser, secondAttackerUser, Context, pvpImage);
+                if (firstAttackerIsWinner)
                 {
-                    if (firstAttacker.Speed != firstAttackerSpeed || secondAttacker.Speed != secondAttackerSpeed) // If the speed of either familiar changes, recalculate the turn order
-                    {
-                        (firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser) = await CalculateSpeed(activeFamiliar, Context.User, opponentActiveFamiliar, user);
-                        firstAttackerSpeed = firstAttacker.Speed;
-                        secondAttackerSpeed = secondAttacker.Speed;
-                    }
-                    
-                    var firstAttackerIsWinner = await DoTurn(firstAttacker, secondAttacker, firstAttackerUser, secondAttackerUser, embed, reply, Context);
-                    if (firstAttackerIsWinner)
-                    {
-                        return firstAttackerUser;
-                    };
-                    
-                    await Task.Delay(3000);
-                    
-                    var secondAttackerIsWinner = await DoTurn(secondAttacker, firstAttacker, secondAttackerUser, firstAttackerUser, embed, reply, Context);
-                    if (secondAttackerIsWinner)
-                    {
-                        return secondAttackerUser;
-                    };
-                    
-                    await CheckStatusCondition(firstAttacker, firstAttackerUser, embed, reply);
-                    await CheckStatusCondition(secondAttacker, secondAttackerUser, embed, reply);
-                    
-                    var firstWinner = CheckWinner(Context, firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser);
-                    if (firstWinner)
-                    {
-                        return firstAttackerUser;
-                    }
-                    
-                    var secondWinner = CheckWinner(Context, secondAttacker, secondAttackerUser, firstAttacker, firstAttackerUser);
-                    if (secondWinner)
-                    {
-                        return secondAttackerUser;
-                    }
-                    if (embed.Fields.Count > 20)
-                    {
-                        embed = new EmbedBuilder();
-                        embed.WithColor(Discord.Color.Red);
-                        embed.WithThumbnailUrl(
-                            "https://cdn.discordapp.com/attachments/803309924746395691/1376828611625226351/vs-or-versus-sign-competition-symbol-vector.jpg?ex=6836bf11&is=68356d91&hm=63c3f47d344d24890ab6e3b91b8ad8ec4f4587ea081d8ad831e4ac88350fcb01&");
-                        embed.WithTitle(
-                            $"{Context.User.Username}'s {activeFamiliar.Name} :crossed_swords: {user.Username}'s {opponentActiveFamiliar.Name}");
-                        reply = await Context.Channel.SendMessageAsync(embed: embed.Build());
-                    }
-
-                    await Task.Delay(3000);
+                    await UpdateImage(firstAttacker, secondAttacker,
+                        $"{firstAttackerUser.Username}'s {firstAttacker.Name} has won !", pvpImage);
+                    return firstAttackerUser;
+                };
+                
+                var secondAttackerIsWinner = await DoTurn(secondAttacker, firstAttacker, firstAttacker, secondAttacker, secondAttackerUser, firstAttackerUser, Context, pvpImage);
+                if (secondAttackerIsWinner)
+                {
+                    await UpdateImage(firstAttacker, secondAttacker,
+                        $"{secondAttackerUser.Username}'s {secondAttacker.Name} has won !", pvpImage);
+                    return secondAttackerUser;
+                };
+                // (Familiar familiarToCheck, Familiar firstAttacker, Familiar secondAttacker, SocketUser user, SocketCommandContext Context)
+                await CheckStatusCondition(firstAttacker, firstAttacker, secondAttacker, firstAttackerUser, Context, pvpImage);
+                await CheckStatusCondition(secondAttacker, firstAttacker, secondAttacker, secondAttackerUser, Context, pvpImage);
+                
+                var firstWinner = CheckWinner(Context, firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser);
+                if (firstWinner)
+                {
+                    await UpdateImage(firstAttacker, secondAttacker,
+                        $"{firstAttackerUser.Username}'s {firstAttacker.Name} has won !", pvpImage);
+                    return firstAttackerUser;
                 }
+                
+                var secondWinner = CheckWinner(Context, secondAttacker, secondAttackerUser, firstAttacker, firstAttackerUser);
+                if (secondWinner)
+                {
+                    await UpdateImage(firstAttacker, secondAttacker,
+                        $"{secondAttackerUser.Username}'s {secondAttacker.Name} has won !", pvpImage);
+                    return secondAttackerUser;
+                }
+            }
         }
         private static async Task<(Familiar, SocketUser, Familiar, SocketUser)> CalculateSpeed(Familiar challengerFamiliar, SocketUser challengerUser, Familiar challengedFamiliar, SocketUser challengedUser)
         {
@@ -155,86 +152,90 @@ public class FamiliarBattles
             return (firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser);
         }
         
-        private static async Task<bool> DoTurn(Familiar firstAttacker, Familiar secondAttacker, SocketUser firstAttackerUser, SocketUser secondAttackerUser, EmbedBuilder embed, RestUserMessage reply, SocketCommandContext context)
+        private async Task<bool> DoTurn(Familiar attacker, Familiar defender, Familiar firstAttacker, Familiar secondAttacker,
+            SocketUser attackerUser, SocketUser defenderUser,
+            SocketCommandContext context, PvPImage pvpImage)
         {
-            var firstAttackerStatusConditions = await firstAttacker.GetStatusConditions();
+            var firstAttackerStatusConditions = await attacker.GetStatusConditions();
             var random = new Random();
             if (!firstAttackerStatusConditions.Contains(StatusCondition.Stun))
             {
                 var confused = random.Next(1, 101) <= 50;
-                if ((await firstAttacker.GetStatusConditions()).Contains(StatusCondition.Confuse) && confused)
+                if ((await attacker.GetStatusConditions()).Contains(StatusCondition.Confuse) && confused)
                 {
                     
-                    firstAttacker.Health -= 3;
-                    embed.WithFields().AddField(
-                        $"{firstAttackerUser.Username}'s {firstAttacker.Name} is confused and hurts itself in its confusion for 3 damage!",
-                        $"{firstAttackerUser.Username}'s {firstAttacker.Name} has {firstAttacker.Health} health remaining.");
-                    await reply.ModifyAsync(
-                        new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
+                    attacker.Health -= 3;
+                    await UpdateImage(firstAttacker, secondAttacker,
+                        $"{attackerUser.Username}'s {attacker.Name} is confused and hurts itself in its confusion for 3 damage!", pvpImage);
                 }
                 else
                 {
-                    var attack = await firstAttacker.Attack();
-                    var defend = await secondAttacker.Defend(attack);
-                    secondAttacker.Health -= defend.DamageTaken;
+                    var attack = await attacker.Attack();
+                    var defend = await defender.Defend(attack);
+                    defender.Health -= defend.DamageTaken;
 
                     var criticalHit = attack.CriticalHit == true ? "***" : "";
-                    embed.WithFields().AddField(
-                        $"{criticalHit}{firstAttackerUser.Username}'s {firstAttacker.Name} attacks {secondAttackerUser.Username}'s {secondAttacker.Name} with {attack.AbilityName} for {defend.DamageTaken} damage!{criticalHit}",
-                        $"{secondAttackerUser.Username}'s {secondAttacker.Name} has {secondAttacker.Health} health remaining.");
-                    await reply.ModifyAsync(
-                        new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
+                    
+                    await UpdateImage(firstAttacker, secondAttacker,
+                        $"{criticalHit}{attackerUser.Username}'s {attacker.Name} attacks {defenderUser.Username}'s {defender.Name} with {attack.AbilityName} for {defend.DamageTaken} damage!{criticalHit}",
+                        pvpImage);
 
-                    var winner = CheckWinner(context, secondAttacker, secondAttackerUser, firstAttacker,
-                        firstAttackerUser);
+                    var winner = CheckWinner(context, defender, defenderUser, attacker,
+                        attackerUser);
                     if (winner) return winner;
-                    winner = CheckWinner(context, firstAttacker, firstAttackerUser, secondAttacker,
-                        secondAttackerUser);
+                    winner = CheckWinner(context, attacker, attackerUser, defender,
+                        defenderUser);
                     if (winner) return winner;
 
                     if (defend.IsReflecting)
                     {
-                        firstAttacker.Health -= defend.DamageReflected;
-                        embed.WithFields().AddField(
-                            $"{firstAttackerUser.Username}'s {firstAttacker.Name} reflects {defend.DamageReflected} damage back to {secondAttackerUser.Username}'s {secondAttacker.Name} using its {defend.DamageReflectedMessage}!",
-                            $"{secondAttackerUser.Username}'s {secondAttacker.Name} has {secondAttacker.Health} health remaining.");
+                        attacker.Health -= defend.DamageReflected;
+                        await UpdateImage(firstAttacker, secondAttacker,
+                            $"{attackerUser.Username}'s {attacker.Name} reflects {defend.DamageReflected} damage back to {defenderUser.Username}'s {defender.Name} using its {defend.DamageReflectedMessage}!",
+                            pvpImage);
                     }
-
-                    winner = CheckWinner(context, secondAttacker, firstAttackerUser, firstAttacker,
-                        firstAttackerUser);
+                   
+                    winner = CheckWinner(context, defender, attackerUser, attacker,
+                        attackerUser);
                     return winner;
             
                 }
             }
             else
             {
-                embed.WithFields().AddField("Stunned!", $"{firstAttackerUser.Username}'s {firstAttacker.Name} is stunned and cannot attack this turn.");
-                await reply.ModifyAsync(
-                    new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
-                await firstAttacker.RemoveStatusCondition(StatusCondition.Stun);
+                await attacker.RemoveStatusCondition(StatusCondition.Stun);
+                await UpdateImage(firstAttacker, secondAttacker,
+                    $"{attackerUser.Username}'s {attacker.Name} is stunned and cannot attack this turn.", pvpImage);
+
             }
             return false;
         }
+        private List<string> debugOutput = new List<string>();
+        private async Task UpdateImage(Familiar firstAttacker, Familiar secondAttacker, string battleText, PvPImage pvpImage)
+        {
+            await pvpImage.GeneratePvPImage(firstAttacker, secondAttacker, battleText);
+            debugOutput.Add(battleText);
+        }
         
-        private static async Task CheckStatusCondition(Familiar familiar, SocketUser user, EmbedBuilder embed, RestUserMessage reply)
+        private async Task CheckStatusCondition(Familiar familiarToCheck, Familiar firstAttacker, Familiar secondAttacker, SocketUser user, SocketCommandContext Context, PvPImage pvpImage)
         {
             var removeConfuse = false;
-            foreach (var statusCondition in (await familiar.GetStatusConditions()).Distinct())
+            foreach (var statusCondition in (await familiarToCheck.GetStatusConditions()).Distinct())
             {
                 switch (statusCondition)
                 {
                     case StatusCondition.Burn:
-                        familiar.Health -= 2;
-                        embed.WithFields().AddField($"{user.Username}'s {familiar.Name} is burning! They take 2 fire damage.", $"{user.Username}'s {familiar.Name} has {familiar.Health} health remaining.");
-                        await reply.ModifyAsync(
-                            new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
+                        familiarToCheck.Health -= 2;
+
+                        await UpdateImage(firstAttacker, secondAttacker,
+                            $"{user.Username}'s {familiarToCheck.Name} is burning! They take 2 fire damage.", pvpImage);
                         break;
                     case StatusCondition.Poison:
-                        var damage = (await familiar.GetStatusConditions()).Count(s=>s == StatusCondition.Poison);
-                        familiar.Health -= damage;
-                        embed.WithFields().AddField($"{user.Username}'s {familiar.Name} is poisoned! They take {damage} poison damage.", $"{user.Username}'s {familiar.Name} has {familiar.Health} health remaining.");
-                        await reply.ModifyAsync(
-                            new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
+                        var damage = (await familiarToCheck.GetStatusConditions()).Count(s=>s == StatusCondition.Poison);
+                        familiarToCheck.Health -= damage;
+                        
+                        await UpdateImage(firstAttacker, secondAttacker,
+                            $"{user.Username}'s {familiarToCheck.Name} is poisoned! They take {damage} poison damage.", pvpImage);
                         break;
                     case StatusCondition.Confuse:
                         var random = new Random();
@@ -247,10 +248,9 @@ public class FamiliarBattles
             }
             if (removeConfuse)
             {
-                await familiar.RemoveStatusCondition(StatusCondition.Confuse);
-                embed.WithFields().AddField($"{user.Username}'s {familiar.Name} snaps out of confusion!", $"{user.Username}'s {familiar.Name} is no longer confused.");
-                await reply.ModifyAsync(
-                    new Action<MessageProperties>(props => { props.Embed = embed.Build(); }));
+                await familiarToCheck.RemoveStatusCondition(StatusCondition.Confuse);
+                await UpdateImage(firstAttacker, secondAttacker,
+                    $"{user.Username}'s {familiarToCheck.Name} snaps out of confusion!", pvpImage);
             }
         }
         
