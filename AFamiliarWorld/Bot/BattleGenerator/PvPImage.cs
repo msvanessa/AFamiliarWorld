@@ -97,7 +97,7 @@ public class PvPImage
 
         });
         
-        var font = new Font(SystemFonts.Get("Arial"), 30);
+        var font = new Font(SystemFonts.Get("Montserrat Medium"), 30);
         var textOptions = new RichTextOptions(font)
         {
             HorizontalAlignment = HorizontalAlignment.Center,

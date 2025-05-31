@@ -169,7 +169,7 @@ public class FamiliarBattles
                     var criticalHit = attack.CriticalHit == true ? "***" : "";
                     
                     await UpdateImage(firstAttacker, secondAttacker,
-                        $"{criticalHit}{attackerUser.Username}'s {attacker.Name} attacks {defenderUser.Username}'s {defender.Name} with {attack.AbilityName} for {defend.DamageTaken} damage!{criticalHit}",
+                        $"{criticalHit}{attackerUser.Username}'s {attacker.Name} attacks using {attack.AbilityName} for {defend.DamageTaken} damage!{criticalHit}",
                         pvpImage);
 
                     var winner = await CheckWinner(firstAttacker, secondAttacker, defender, defenderUser, attacker, attackerUser, pvpImage);
@@ -187,7 +187,7 @@ public class FamiliarBattles
                     {
                         attacker.Health -= defend.DamageReflected;
                         await UpdateImage(firstAttacker, secondAttacker,
-                            $"{defenderUser.Username}'s {defender.Name} reflects {defend.DamageReflected} damage back to {attackerUser.Username}'s {attacker.Name} using its {defend.DamageReflectedMessage}!",
+                            $"{defenderUser.Username}'s {defender.Name} reflects {defend.DamageReflected} damage back using its {defend.DamageReflectedMessage}!",
                             pvpImage);
                     }
                    
