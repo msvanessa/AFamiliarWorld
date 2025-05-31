@@ -5,7 +5,6 @@ namespace AFamiliarWorld.Bot.Familiars;
 public class Clockroach:Familiar
 {
     private List<Func<Task<FamiliarAttackingAction>>> actions;
-    private int MaxHealth = 40;
     public Clockroach()
     {
         this.actions = new List<Func<Task<FamiliarAttackingAction>>>
@@ -15,7 +14,6 @@ public class Clockroach:Familiar
         var random = new Random();
         this.Name = "Clockroach";
         this.Description = "I clock, I roach, I clockroach";
-        this.Emoji = "<:FamiliarClockRoach:1378164199426883634>";
         this.Quip = "*Winds you up*";
         this.Color = 0xa75600;
         this.Url = "https://media.discordapp.net/attachments/1246170699362729995/1375190322996580412/assets_task_01jvwpn0mqff4vf7b0de9s151x_1747941299_img_1.webp?ex=6831720a&is=6830208a&hm=2ebf5e6cba5c4784f875f7398494e1a82e1269342cc85746db8f9280230d3407&=&format=webp&width=645&height=968";
@@ -26,9 +24,11 @@ public class Clockroach:Familiar
         this.Resolve = 15;
         
         this.Luck = 5;
+
+        this.MaxHealth = 250;
+        this.Health = this.MaxHealth;
         
-        this.Health = MaxHealth;
-        this.Speed = 1;
+        this.Speed = 100;
         this.Cuteness = random.Next(1, 10001);
     }
     public override async Task<FamiliarAttackingAction> Attack()

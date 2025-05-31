@@ -1,7 +1,6 @@
 using System.Text;
 using AFamiliarWorld.Bot.Familiars;
 using AFamiliarWorld.Bot.Familiars.StarterFamiliars;
-using Discord;
 using Discord.Commands;
 using Newtonsoft.Json;
 
@@ -157,51 +156,6 @@ public class FamiliarManagement
                 return;
             }
             await ReplyAsync(embed:activeFamiliar.Display());
-        }
-        
-        [Command("profile")]
-        [Summary("Displays your player profile")]
-        public async Task DisplayProfileAsync()
-        {
-            var player = FileManager.FetchUserData(Context.User.Id);
-            if (player == null)
-            {
-                await ReplyAsync("You haven't created a profile"); 
-                return;
-            }
-    
-            // Join familiar names and stats with newlines to separate each familiar
-            var familiarNames = string.Join("\n", player.familiars.Select(f => $"{f.Emoji} {(f.ActiveFamiliar ? "*":"")}{f.Name}"));
-            var familiarStats = string.Join("\n", player.familiars.Select(f => $"{f.Power}/{f.Physique}/{f.Willpower}/{f.Resolve}/{f.Luck}/{f.Health}/{f.Speed}"));
-    
-            var embedBuilder = new EmbedBuilder()
-            {
-                Title = $"{Context.User.GlobalName}'s Profile",
-                ThumbnailUrl = Context.User.GetAvatarUrl(),
-                Color = Discord.Color.Gold,
-                Footer = new EmbedFooterBuilder()
-                {
-                    Text = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - player.timeSinceLastScavenge > 1800 ? "Scavenge is available" : "Scavenge is unavailable"
-                },
-                Fields = new List<EmbedFieldBuilder>()
-                {
-                    new EmbedFieldBuilder()
-                    {
-                        Name = @"**Familiars**",
-                        Value = familiarNames,
-                        IsInline = true
-                    },
-                    new EmbedFieldBuilder()
-                    {
-                        Name = @"**Pwr/Phy/Wil/Res/Luc/Hp/Spd**",
-                        Value = familiarStats,
-                        IsInline = true
-                    }
-                },
-                Description = $":moneybag: {player.Gold}"
-            };
-    
-            await ReplyAsync(embed: embedBuilder.Build());
         }
     }
 }

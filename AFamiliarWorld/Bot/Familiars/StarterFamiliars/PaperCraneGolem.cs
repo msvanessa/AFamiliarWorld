@@ -4,7 +4,6 @@ namespace AFamiliarWorld.Bot.Familiars;
 
 public class PaperCraneGolem:Familiar
 {
-    private int MaxHealth = 350;
     private List<Func<Task<FamiliarAttackingAction>>> actions;
     public PaperCraneGolem()
     {
@@ -17,7 +16,6 @@ public class PaperCraneGolem:Familiar
         var random = new Random();
         this.Name = "Paper Crane Golem";
         this.Description = "Beep boop";
-        this.Emoji = "<:FamiliarPaperCraneGolem:1378165432602722346>";
         this.Quip = "*Does the robot*";
         this.Color = 0xb66d34;
         this.Url = "https://cdn.discordapp.com/attachments/1246170699362729995/1375184022317039677/assets_task_01jvwn8e9bejabs40h4cag97ft_1747939803_img_1.webp?ex=68316c2c&is=68301aac&hm=fd421e630543b8d6e3601d4223cd4070d7e4a7083c579df74e450c0ac1cddcbc&";
@@ -28,9 +26,11 @@ public class PaperCraneGolem:Familiar
         this.Resolve = 10;
         
         this.Luck = 5;
+
+        this.MaxHealth = 350;
+        this.Health = this.MaxHealth;
         
-        this.Health = MaxHealth;
-        this.Speed = 1;
+        this.Speed = 7;
         this.Cuteness = random.Next(1, 10001);
     }
     public override async Task<FamiliarAttackingAction> Attack()

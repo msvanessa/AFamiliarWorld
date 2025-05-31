@@ -15,15 +15,15 @@ public class Familiar
     public uint Color { get; set; }
     [JsonIgnore] 
     public string Url { get; set; }
-    [JsonIgnore] 
-    public string Emoji { get; set; }
     public int Power { get; set; }
     public int Physique { get; set; }
     public int Speed { get; set; }
     public int Willpower { get; set; }
     public int Resolve { get; set; }
     public int Cuteness { get; set; }
+    [JsonIgnore]
     public int Health  { get; set; }
+    public int MaxHealth { get; set; }
     public int Luck { get; set; }
     public string FamiliarID { get; set; }
     public bool ActiveFamiliar { get; set; } = false;
