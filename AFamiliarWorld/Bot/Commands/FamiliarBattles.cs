@@ -49,6 +49,7 @@ public class FamiliarBattles
                 var loserPlayer = FileManager.FetchUserData(loser.Id);
                 loserPlayer.Gold -= 50;
                 FileManager.SaveUserData(loser.Id, loserPlayer);
+                
                 await Context.Channel.SendFileAsync(await pvpImage.CompileMemoryStreams(), "pvp_battle.gif");
                 var fileBytes = Encoding.UTF8.GetBytes(string.Join("\n", debugOutput));
                 var fileStream = new MemoryStream(fileBytes);
@@ -101,34 +102,26 @@ public class FamiliarBattles
                 var winner = await DoTurn(firstAttacker, secondAttacker, firstAttacker, secondAttacker, firstAttackerUser, secondAttackerUser, Context, pvpImage);
                 if (winner.Item1 != null && winner.Item2 != null)
                 {
-                    await UpdateImage(firstAttacker, secondAttacker,
-                        $"{winner.Item2.Username}'s {winner.Item1.Name} has won !", pvpImage);
                     return winner.Item2;
                 };
                 winner = await DoTurn(secondAttacker, firstAttacker, firstAttacker, secondAttacker, secondAttackerUser, firstAttackerUser, Context, pvpImage);
                 if (winner.Item1 != null && winner.Item2 != null)
                 {
-                    await UpdateImage(firstAttacker, secondAttacker,
-                        $"{winner.Item2.Username}'s {winner.Item1.Name} has won !", pvpImage);
                     return winner.Item2;
                 };
                 // (Familiar familiarToCheck, Familiar firstAttacker, Familiar secondAttacker, SocketUser user, SocketCommandContext Context)
                 await CheckStatusCondition(firstAttacker, firstAttacker, secondAttacker, firstAttackerUser, pvpImage);
                 await CheckStatusCondition(secondAttacker, firstAttacker, secondAttacker, secondAttackerUser, pvpImage);
                 
-                var firstWinner = CheckWinner(Context, firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser);
+                var firstWinner = await CheckWinner(firstAttacker, secondAttacker, firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser, pvpImage);
                 if (firstWinner)
                 {
-                    await UpdateImage(firstAttacker, secondAttacker,
-                        $"{firstAttackerUser.Username}'s {firstAttacker.Name} has won !", pvpImage);
                     return firstAttackerUser;
                 }
                 
-                var secondWinner = CheckWinner(Context, secondAttacker, secondAttackerUser, firstAttacker, firstAttackerUser);
+                var secondWinner = await CheckWinner(firstAttacker, secondAttacker, secondAttacker, secondAttackerUser, firstAttacker, firstAttackerUser, pvpImage);
                 if (secondWinner)
                 {
-                    await UpdateImage(firstAttacker, secondAttacker,
-                        $"{secondAttackerUser.Username}'s {secondAttacker.Name} has won !", pvpImage);
                     return secondAttackerUser;
                 }
             }
@@ -179,12 +172,12 @@ public class FamiliarBattles
                         $"{criticalHit}{attackerUser.Username}'s {attacker.Name} attacks {defenderUser.Username}'s {defender.Name} with {attack.AbilityName} for {defend.DamageTaken} damage!{criticalHit}",
                         pvpImage);
 
-                    var winner = CheckWinner(context, defender, defenderUser, attacker, attackerUser);
+                    var winner = await CheckWinner(firstAttacker, secondAttacker, defender, defenderUser, attacker, attackerUser, pvpImage);
                     if (winner)
                     {
                         return (defender, defenderUser);
                     }
-                    winner = CheckWinner(context, attacker, attackerUser, defender, defenderUser);
+                    winner = await CheckWinner(firstAttacker, secondAttacker, attacker, attackerUser, defender, defenderUser, pvpImage);
                     if (winner)
                     {
                         return (attacker, attackerUser);
@@ -198,8 +191,8 @@ public class FamiliarBattles
                             pvpImage);
                     }
                    
-                    winner = CheckWinner(context, defender, defenderUser, attacker,
-                        attackerUser);
+                    winner = await CheckWinner(firstAttacker, secondAttacker, defender, defenderUser, attacker,
+                        attackerUser, pvpImage);
                     if(winner) return (defender, defenderUser);
             
                 }
@@ -257,16 +250,12 @@ public class FamiliarBattles
             }
         }
         
-        private static bool CheckWinner(SocketCommandContext context, Familiar winnerFamiliar, SocketUser winnerUser, Familiar loserFamiliar, SocketUser loserUser)
+        private async Task<bool> CheckWinner(Familiar firstAttacker, Familiar secondAttacker, Familiar winnerFamiliar, SocketUser winnerUser, Familiar loserFamiliar, SocketUser loserUser, PvPImage pvpImage)
         {
             if (loserFamiliar.Health <= 0)
             {
-                var embed = new EmbedBuilder();
-                embed.WithColor(Discord.Color.Red);
-                embed.WithTitle($"{winnerUser.Username}'s {winnerFamiliar.Name} wins! {winnerUser.Username} gains 50 of {loserUser.Username}'s Gold !");
-                embed.WithImageUrl("https://cdn.discordapp.com/attachments/803309924746395691/1376829532660568064/victory-pop-up-golden-assets-award-with-crown-for-game-illustration-golden-banner-with-wings-and-red-flags-vector.jpg?ex=6836bfec&is=68356e6c&hm=ffe35dc277c4b053ae396cf905581e05767837143ef2fffa6305203be11c08e7&");
-                embed.WithThumbnailUrl(winnerUser.GetAvatarUrl());
-                context.Channel.SendMessageAsync(embed: embed.Build());
+                await UpdateImage(firstAttacker, secondAttacker,
+                    $"{winnerUser.Username}'s {winnerFamiliar.Name} wins! {winnerUser.Username} gains 50 of {loserUser.Username}'s Gold !", pvpImage);
                 return true;
             }
             return false;
