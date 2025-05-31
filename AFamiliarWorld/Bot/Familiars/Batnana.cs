@@ -152,6 +152,7 @@ public class Batnana:Familiar
             defendingAction.IsReflecting = true;
             defendingAction.DamageReflected = 20;
             defendingAction.DamageReflectedMessage = "Evasive Flutter";
+            this.isEvading = false;
         }
 
         return defendingAction;
