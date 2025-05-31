@@ -23,6 +23,7 @@ public class CrystalBeetle:Familiar
         this.Name = "Crystal Beetle";
         this.Description = "...";
         this.Quip = "*Hunkers down*";
+        this.Emoji = "<:FamiliarCrystalbeetle:1378164202245587055>";
         this.Color = 0x34e9d0;
         this.Url = "https://cdn.discordapp.com/attachments/1246170699362729995/1375184355504423063/assets_task_01jvwnaxt0eyzbc2bbb853pmxf_1747939882_img_0.webp?ex=68316c7c&is=68301afc&hm=66a1087f14c1e0cbe2c431e9cff617e260f809df7e5a73b86f88e566330f0e3a&";
         this.Power = 60;

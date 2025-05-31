@@ -18,6 +18,7 @@ public class Bandcoon:Familiar
         var random = new Random();
         this.Name = "Bandcoon";
         this.Description = "*Steals your gun*";
+        this.Emoji = "<:FamiliarBandcoon:1378164191721947218>";
         this.Quip = "*MINE MINE MINE*";
         this.Color = 0x1dd3df;
         this.Url = "https://cdn.discordapp.com/attachments/1246170699362729995/1377615519489851412/assets_task_01jwd0kxy8e74ty8skmt7nxay8_1748488577_img_0.webp?ex=68399bee&is=68384a6e&hm=0e377038e71fc6f3bdd5e5141f68d611c7c0f2827945eaa9ffe8e4e28a5885d2&";
