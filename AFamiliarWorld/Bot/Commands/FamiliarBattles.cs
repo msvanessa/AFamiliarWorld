@@ -105,7 +105,6 @@ public class FamiliarBattles
                         $"{firstAttackerUser.Username}'s {firstAttacker.Name} has won !", pvpImage);
                     return firstAttackerUser;
                 };
-                
                 var secondAttackerIsWinner = await DoTurn(secondAttacker, firstAttacker, firstAttacker, secondAttacker, secondAttackerUser, firstAttackerUser, Context, pvpImage);
                 if (secondAttackerIsWinner)
                 {
@@ -191,7 +190,7 @@ public class FamiliarBattles
                     {
                         attacker.Health -= defend.DamageReflected;
                         await UpdateImage(firstAttacker, secondAttacker,
-                            $"{attackerUser.Username}'s {attacker.Name} reflects {defend.DamageReflected} damage back to {defenderUser.Username}'s {defender.Name} using its {defend.DamageReflectedMessage}!",
+                            $"{defenderUser.Username}'s {defender.Name} reflects {defend.DamageReflected} damage back to {attackerUser.Username}'s {attacker.Name} using its {defend.DamageReflectedMessage}!",
                             pvpImage);
                     }
                    
