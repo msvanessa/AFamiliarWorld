@@ -123,6 +123,7 @@ public class Bandcoon:Familiar
         action.AbilityName = "Eat trash";
         action.Damage = 0;
         action.DamageType = DamageType.Physical;
+        action.IsTrueDamage = true;
         var option = random.Next(0, 9);
         switch (option)
         {

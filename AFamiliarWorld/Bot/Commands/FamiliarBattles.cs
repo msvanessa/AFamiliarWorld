@@ -98,23 +98,23 @@ public class FamiliarBattles
                     secondAttackerSpeed = secondAttacker.Speed;
                 }
                 
-                var firstAttackerIsWinner = await DoTurn(firstAttacker, secondAttacker, firstAttacker, secondAttacker, firstAttackerUser, secondAttackerUser, Context, pvpImage);
-                if (firstAttackerIsWinner)
+                var winner = await DoTurn(firstAttacker, secondAttacker, firstAttacker, secondAttacker, firstAttackerUser, secondAttackerUser, Context, pvpImage);
+                if (winner.Item1 != null && winner.Item2 != null)
                 {
                     await UpdateImage(firstAttacker, secondAttacker,
-                        $"{firstAttackerUser.Username}'s {firstAttacker.Name} has won !", pvpImage);
-                    return firstAttackerUser;
+                        $"{winner.Item2.Username}'s {winner.Item1.Name} has won !", pvpImage);
+                    return winner.Item2;
                 };
-                var secondAttackerIsWinner = await DoTurn(secondAttacker, firstAttacker, firstAttacker, secondAttacker, secondAttackerUser, firstAttackerUser, Context, pvpImage);
-                if (secondAttackerIsWinner)
+                winner = await DoTurn(secondAttacker, firstAttacker, firstAttacker, secondAttacker, secondAttackerUser, firstAttackerUser, Context, pvpImage);
+                if (winner.Item1 != null && winner.Item2 != null)
                 {
                     await UpdateImage(firstAttacker, secondAttacker,
-                        $"{secondAttackerUser.Username}'s {secondAttacker.Name} has won !", pvpImage);
-                    return secondAttackerUser;
+                        $"{winner.Item2.Username}'s {winner.Item1.Name} has won !", pvpImage);
+                    return winner.Item2;
                 };
                 // (Familiar familiarToCheck, Familiar firstAttacker, Familiar secondAttacker, SocketUser user, SocketCommandContext Context)
-                await CheckStatusCondition(firstAttacker, firstAttacker, secondAttacker, firstAttackerUser, Context, pvpImage);
-                await CheckStatusCondition(secondAttacker, firstAttacker, secondAttacker, secondAttackerUser, Context, pvpImage);
+                await CheckStatusCondition(firstAttacker, firstAttacker, secondAttacker, firstAttackerUser, pvpImage);
+                await CheckStatusCondition(secondAttacker, firstAttacker, secondAttacker, secondAttackerUser, pvpImage);
                 
                 var firstWinner = CheckWinner(Context, firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser);
                 if (firstWinner)
@@ -151,7 +151,7 @@ public class FamiliarBattles
             return (firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser);
         }
         
-        private async Task<bool> DoTurn(Familiar attacker, Familiar defender, Familiar firstAttacker, Familiar secondAttacker,
+        private async Task<(Familiar?, SocketUser?)> DoTurn(Familiar attacker, Familiar defender, Familiar firstAttacker, Familiar secondAttacker,
             SocketUser attackerUser, SocketUser defenderUser,
             SocketCommandContext context, PvPImage pvpImage)
         {
@@ -179,12 +179,16 @@ public class FamiliarBattles
                         $"{criticalHit}{attackerUser.Username}'s {attacker.Name} attacks {defenderUser.Username}'s {defender.Name} with {attack.AbilityName} for {defend.DamageTaken} damage!{criticalHit}",
                         pvpImage);
 
-                    var winner = CheckWinner(context, defender, defenderUser, attacker,
-                        attackerUser);
-                    if (winner) return winner;
-                    winner = CheckWinner(context, attacker, attackerUser, defender,
-                        defenderUser);
-                    if (winner) return winner;
+                    var winner = CheckWinner(context, defender, defenderUser, attacker, attackerUser);
+                    if (winner)
+                    {
+                        return (defender, defenderUser);
+                    }
+                    winner = CheckWinner(context, attacker, attackerUser, defender, defenderUser);
+                    if (winner)
+                    {
+                        return (attacker, attackerUser);
+                    }
 
                     if (defend.IsReflecting)
                     {
@@ -194,9 +198,9 @@ public class FamiliarBattles
                             pvpImage);
                     }
                    
-                    winner = CheckWinner(context, defender, attackerUser, attacker,
+                    winner = CheckWinner(context, defender, defenderUser, attacker,
                         attackerUser);
-                    return winner;
+                    if(winner) return (defender, defenderUser);
             
                 }
             }
@@ -207,7 +211,7 @@ public class FamiliarBattles
                     $"{attackerUser.Username}'s {attacker.Name} is stunned and cannot attack this turn.", pvpImage);
 
             }
-            return false;
+            return (null, null);
         }
         private List<string> debugOutput = new List<string>();
         private async Task UpdateImage(Familiar firstAttacker, Familiar secondAttacker, string battleText, PvPImage pvpImage)
@@ -216,7 +220,7 @@ public class FamiliarBattles
             debugOutput.Add(battleText);
         }
         
-        private async Task CheckStatusCondition(Familiar familiarToCheck, Familiar firstAttacker, Familiar secondAttacker, SocketUser user, SocketCommandContext Context, PvPImage pvpImage)
+        private async Task CheckStatusCondition(Familiar familiarToCheck, Familiar firstAttacker, Familiar secondAttacker, SocketUser user, PvPImage pvpImage)
         {
             var removeConfuse = false;
             foreach (var statusCondition in (await familiarToCheck.GetStatusConditions()).Distinct())
