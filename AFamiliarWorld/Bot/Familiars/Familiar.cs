@@ -17,6 +17,8 @@ public class Familiar
     public string Url { get; set; }
     public int Power { get; set; }
     public int Physique { get; set; }
+    [JsonIgnore] 
+    public string Emoji { get; set; }
     public int Speed { get; set; }
     public int Willpower { get; set; }
     public int Resolve { get; set; }
