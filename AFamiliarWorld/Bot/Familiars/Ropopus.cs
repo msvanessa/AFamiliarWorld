@@ -16,6 +16,7 @@ public class Ropopus:Familiar
         this.Name = "Ropopus";
         this.Description = "._.";
         this.Quip = "*Wraps around u";
+        this.Emoji = "<:FamiliarRopopus:1378164220612317294>";
         this.Color = 0x925252;
         this.Url = "https://media.discordapp.net/attachments/1246170699362729995/1375198791673581618/assets_task_01jvwrgw9ze34t1wb04gj76wmw_1747943275_img_0.webp?ex=683179ed&is=6830286d&hm=d4160412efe492d4441bf076d19bd064abf59fcadf1e8694472911a966430cc3&=&format=webp&width=645&height=968";
         this.Power = 40;

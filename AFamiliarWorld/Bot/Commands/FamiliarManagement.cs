@@ -1,6 +1,7 @@
 using System.Text;
 using AFamiliarWorld.Bot.Familiars;
 using AFamiliarWorld.Bot.Familiars.StarterFamiliars;
+using Discord;
 using Discord.Commands;
 using Newtonsoft.Json;
 
@@ -156,6 +157,34 @@ public class FamiliarManagement
                 return;
             }
             await ReplyAsync(embed:activeFamiliar.Display());
+        }
+        
+        [Command("profile")]
+        [Summary("Displays your player profile")]
+        public async Task DisplayProfileAsync()
+        {
+            var player = FileManager.FetchUserData(Context.User.Id);
+            if (player == null)
+            {
+                await ReplyAsync("You haven't created a profile"); 
+                return;
+            }
+            var boarder = "\u200B \u200B ";
+            var fams = string.Join("\n", player.familiars.Select(f => $"{f.Emoji} {f.Name} {string.Concat(Enumerable.Repeat(boarder, (20 - f.Name.Length)))} {f.Power}/{f.Physique}/{f.Willpower}/{f.Resolve}/{f.Luck}/{f.Health}/{f.Speed}"));
+            
+            var embedBuilder = new EmbedBuilder()
+            {
+                Title = $"{Context.User.GlobalName}'s Profile",
+                ThumbnailUrl = Context.User.GetAvatarUrl(),
+                Color = Discord.Color.Gold,
+                Description = $"# Familiars \n {string.Concat(Enumerable.Repeat(boarder, 20))}**Pwr/Phy/Wil/Res/Luc/HP/Spd** \n{fams}\n\n 💰 {player.Gold}",
+                Footer = new EmbedFooterBuilder()
+                {
+                    Text = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - player.timeSinceLastScavenge > 1800 ? "Scavenge is avalible" : "Scavenge is unavalible"
+                }
+            };
+            
+            await ReplyAsync(embed: embedBuilder.Build());
         }
     }
 }

@@ -34,28 +34,47 @@ public class FamiliarBattles
                 }
                 
                 await ReplyAsync($"{user.Username} accepted the challenge!");
+
+                var winner = await Dual(Context, user);
+                if (winner == null) return;
+
+                var winnerPlayer = FileManager.FetchUserData(winner.Id);
+                winnerPlayer.Gold += 50;
+                FileManager.SaveUserData(winner.Id, winnerPlayer);
                 
-                
-                var player = FileManager.FetchUserData(Context.User.Id);
+                var loser = winner.Id == Context.User.Id ? user : Context.User;
+                var loserPlayer = FileManager.FetchUserData(loser.Id);
+                loserPlayer.Gold -= 50;
+                FileManager.SaveUserData(loser.Id, loserPlayer);
+            }
+            catch (Exception ex)
+            {
+                await ReplyAsync($"An error occurred: {ex.Message}");
+            }
+        }
+
+        private async Task<SocketUser?> Dual(SocketCommandContext Context, SocketUser user)
+        {
+                            var player = FileManager.FetchUserData(Context.User.Id);
                 var opponent = FileManager.FetchUserData(user.Id);
                 if (player == null || opponent == null)
                 {
                     await ReplyAsync("One of the players does not have a profile. Please create a profile using the `!createplayer` command.");
-                    return;
+                    return null;
                 }   
                 
                 var activeFamiliar = player.familiars.FirstOrDefault(f => f.ActiveFamiliar);
                 if (activeFamiliar == null)
                 {
                     await ReplyAsync("You don't have an active familiar");
-                    return;
+                    return null;
                 }
 
                 var opponentActiveFamiliar = opponent.familiars.FirstOrDefault(f => f.ActiveFamiliar);
                 if (opponentActiveFamiliar == null)
                 {
                     await ReplyAsync($"{user.Username} doesn't have an active familiar");
-                    return;
+                    return null;
                 }
                 
                 var embed = new EmbedBuilder();
@@ -77,21 +96,33 @@ public class FamiliarBattles
                     }
                     
                     var firstAttackerIsWinner = await DoTurn(firstAttacker, secondAttacker, firstAttackerUser, secondAttackerUser, embed, reply, Context);
-                    if (firstAttackerIsWinner) break;
+                    if (firstAttackerIsWinner)
+                    {
+                        return firstAttackerUser;
+                    };
                     
                     await Task.Delay(3000);
                     
                     var secondAttackerIsWinner = await DoTurn(secondAttacker, firstAttacker, secondAttackerUser, firstAttackerUser, embed, reply, Context);
-                    if (secondAttackerIsWinner) break;
+                    if (secondAttackerIsWinner)
+                    {
+                        return secondAttackerUser;
+                    };
                     
                     await CheckStatusCondition(firstAttacker, firstAttackerUser, embed, reply);
                     await CheckStatusCondition(secondAttacker, secondAttackerUser, embed, reply);
                     
                     var firstWinner = CheckWinner(Context, firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser);
-                    if (firstWinner) break;
+                    if (firstWinner)
+                    {
+                        return firstAttackerUser;
+                    }
                     
                     var secondWinner = CheckWinner(Context, secondAttacker, secondAttackerUser, firstAttacker, firstAttackerUser);
-                    if (secondWinner) break;
+                    if (secondWinner)
+                    {
+                        return secondAttackerUser;
+                    }
                     if (embed.Fields.Count > 20)
                     {
                         embed = new EmbedBuilder();
@@ -105,13 +136,7 @@ public class FamiliarBattles
 
                     await Task.Delay(3000);
                 }
-            }
-            catch (Exception ex)
-            {
-                await ReplyAsync($"An error occurred: {ex.Message}");
-            }
         }
-
         private static async Task<(Familiar, SocketUser, Familiar, SocketUser)> CalculateSpeed(Familiar challengerFamiliar, SocketUser challengerUser, Familiar challengedFamiliar, SocketUser challengedUser)
         {
             var firstAttackerUser = challengerFamiliar.Speed >= challengedFamiliar.Speed ? challengerUser : challengedUser;
@@ -235,7 +260,7 @@ public class FamiliarBattles
             {
                 var embed = new EmbedBuilder();
                 embed.WithColor(Discord.Color.Red);
-                embed.WithTitle($"{winnerUser.Username}'s {winnerFamiliar.Name} wins!");
+                embed.WithTitle($"{winnerUser.Username}'s {winnerFamiliar.Name} wins! {winnerUser.Username} gains 50 of {loserUser.Username}'s Gold !");
                 embed.WithImageUrl("https://cdn.discordapp.com/attachments/803309924746395691/1376829532660568064/victory-pop-up-golden-assets-award-with-crown-for-game-illustration-golden-banner-with-wings-and-red-flags-vector.jpg?ex=6836bfec&is=68356e6c&hm=ffe35dc277c4b053ae396cf905581e05767837143ef2fffa6305203be11c08e7&");
                 embed.WithThumbnailUrl(winnerUser.GetAvatarUrl());
                 context.Channel.SendMessageAsync(embed: embed.Build());
