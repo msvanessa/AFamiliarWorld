@@ -4,10 +4,10 @@ namespace AFamiliarWorld.Bot.Familiars.StarterFamiliars;
 
 public class Imp:Familiar
 {
-    private List<Func<Task<FamiliarAttackingAction>>> actions;
+    private List<Func<Familiar, Task<FamiliarAttackingAction>>> actions;
     public Imp()
     {
-        this.actions = new List<Func<Task<FamiliarAttackingAction>>>
+        this.actions = new List<Func<Familiar, Task<FamiliarAttackingAction>>>
         {
             Firebolt,
             Scratch,
@@ -42,7 +42,7 @@ public class Imp:Familiar
         this.Abilities.Add(new Ability("Spell: Wing Flap", $"A magical attack that deals 0 damage and clears all status conditions, transferring them to the target."));
     }
 
-    public async Task<FamiliarAttackingAction> WingFlap()
+    public async Task<FamiliarAttackingAction> WingFlap(Familiar familiar)
     {
         var action = new FamiliarAttackingAction()
         {
@@ -51,14 +51,15 @@ public class Imp:Familiar
             CriticalHit = false,
             DamageType = DamageType.Magical,
             StatusConditions = (await this.GetStatusConditions()).ToList(),
-            IsTrueDamage = true
+            IsTrueDamage = true,
+            CustomOutput = $"{this.Name} flaps its wings, transferring its status conditions"
         };
 
         await this.ClearStatusConditions();
         return action;
     }
 
-    public async Task<FamiliarAttackingAction> Sting()
+    public async Task<FamiliarAttackingAction> Sting(Familiar familiar)
     {
         var random = new Random();
         var crit = random.Next(1, 101) < this.Luck;
@@ -74,7 +75,7 @@ public class Imp:Familiar
         return action;
     }
     
-    public async Task<FamiliarAttackingAction> Firebolt()
+    public async Task<FamiliarAttackingAction> Firebolt(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -94,7 +95,7 @@ public class Imp:Familiar
         return action;
     }
     
-    public async Task<FamiliarAttackingAction> Scratch()
+    public async Task<FamiliarAttackingAction> Scratch(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -108,10 +109,10 @@ public class Imp:Familiar
         action.DamageType = DamageType.Physical;
         return action;
     }
-    public override async Task<FamiliarAttackingAction> Attack()
+    public override async Task<FamiliarAttackingAction> Attack(Familiar enemyFamiliar)
     {
         var random = new Random();
         var randomAbility = actions[random.Next(actions.Count)];
-        return await randomAbility.Invoke();
+        return await randomAbility.Invoke(enemyFamiliar);
     }
 }

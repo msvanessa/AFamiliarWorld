@@ -4,11 +4,11 @@ namespace AFamiliarWorld.Bot.Familiars;
 
 public class BookMimic:Familiar
 {
-    private List<Func<Task<FamiliarAttackingAction>>> actions;
+    private List<Func<Familiar, Task<FamiliarAttackingAction>>> actions;
     private int MaxHealth = 300;
     public BookMimic()
     {
-        this.actions = new List<Func<Task<FamiliarAttackingAction>>>
+        this.actions = new List<Func<Familiar, Task<FamiliarAttackingAction>>>
         {
             BookBite
         };
@@ -33,14 +33,14 @@ public class BookMimic:Familiar
         this.Speed = 5;
         this.Cuteness = random.Next(1, 10001);
     }
-    public override async Task<FamiliarAttackingAction> Attack()
+    public override async Task<FamiliarAttackingAction> Attack(Familiar enemyFamiliar)
     {
         var random = new Random();
         var randomAbility = actions[random.Next(actions.Count)];
-        return await randomAbility.Invoke();
+        return await randomAbility.Invoke(enemyFamiliar);
     }
     
-    public async Task<FamiliarAttackingAction> BookBite()
+    public async Task<FamiliarAttackingAction> BookBite(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();

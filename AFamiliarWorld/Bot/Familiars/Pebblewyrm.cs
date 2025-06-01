@@ -4,10 +4,10 @@ namespace AFamiliarWorld.Bot.Familiars;
 
 public class Pebblewyrm:Familiar
 {
-    private List<Func<Task<FamiliarAttackingAction>>> actions;
+    private List<Func<Familiar, Task<FamiliarAttackingAction>>> actions;
     public Pebblewyrm()
     {
-        this.actions = new List<Func<Task<FamiliarAttackingAction>>>
+        this.actions = new List<Func<Familiar, Task<FamiliarAttackingAction>>>
         {
             PebblewyrmAttack
         };
@@ -32,13 +32,13 @@ public class Pebblewyrm:Familiar
         this.Speed = 9;
         this.Cuteness = random.Next(1, 10001);
     }
-    public override async Task<FamiliarAttackingAction> Attack()
+    public override async Task<FamiliarAttackingAction> Attack(Familiar enemyFamiliar)
     {
         var random = new Random();
         var randomAbility = actions[random.Next(actions.Count)];
-        return await randomAbility.Invoke();
+        return await randomAbility.Invoke(enemyFamiliar);
     }
-    public async Task<FamiliarAttackingAction> PebblewyrmAttack()
+    public async Task<FamiliarAttackingAction> PebblewyrmAttack(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();

@@ -6,11 +6,11 @@ namespace AFamiliarWorld.Bot.Familiars;
 
 public class Clockroach : Familiar
 {
-    private List<Func<Task<FamiliarAttackingAction>>> actions;
+    private List<Func<Familiar, Task<FamiliarAttackingAction>>> actions;
     private int RewindHealth = 225;
     public Clockroach()
     {
-        this.actions = new List<Func<Task<FamiliarAttackingAction>>>
+        this.actions = new List<Func<Familiar, Task<FamiliarAttackingAction>>>
         {
             GearjammerBite,
             Timespark,
@@ -41,14 +41,14 @@ public class Clockroach : Familiar
         this.Cuteness = random.Next(1, 10001);
     }
 
-    public override async Task<FamiliarAttackingAction> Attack()
+    public override async Task<FamiliarAttackingAction> Attack(Familiar enemyFamiliar)
     {
         var random = new Random();
         var randomAbility = actions[random.Next(actions.Count)];
-        return await randomAbility.Invoke();
+        return await randomAbility.Invoke(enemyFamiliar);
     }
 
-    public async Task<FamiliarAttackingAction> GearjammerBite()
+    public async Task<FamiliarAttackingAction> GearjammerBite(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -64,7 +64,7 @@ public class Clockroach : Familiar
         return action;
     }
 
-    public async Task<FamiliarAttackingAction> Timespark()
+    public async Task<FamiliarAttackingAction> Timespark(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -80,7 +80,7 @@ public class Clockroach : Familiar
         return action;
     }
 
-    public async Task<FamiliarAttackingAction> Flickerstrike()
+    public async Task<FamiliarAttackingAction> Flickerstrike(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -96,7 +96,7 @@ public class Clockroach : Familiar
         return action;
     }
 
-    public async Task<FamiliarAttackingAction> Selfdestruct()
+    public async Task<FamiliarAttackingAction> Selfdestruct(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -112,7 +112,7 @@ public class Clockroach : Familiar
         return action;
     }
 
-    public async Task<FamiliarAttackingAction> SelfRewind()
+    public async Task<FamiliarAttackingAction> SelfRewind(Familiar familiar)
     {
         var action = new FamiliarAttackingAction()
         

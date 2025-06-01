@@ -164,16 +164,15 @@ public class FamiliarBattles
                 }
                 else
                 {
-                    var attack = await attacker.Attack();
+                    var attack = await attacker.Attack(defender);
                     var defend = await defender.Defend(attack);
                     defender.Health -= defend.DamageTaken;
 
-                    var criticalHit = attack.CriticalHit == true ? "***" : "";
-                    
-                    await UpdateImage(firstAttacker, secondAttacker,
-                        $"{criticalHit}{attackerUser.Username}'s {attacker.Name} attacks using {attack.AbilityName} for {defend.DamageTaken} damage!{criticalHit}",
-                        pvpImage);
-
+                    var criticalHit = attack.CriticalHit ? "***" : "";
+                    var output = attack.CustomOutput ?? $"{criticalHit}{attackerUser.Username}'s {attacker.Name} attacks using {attack.AbilityName} for {defend.DamageTaken} damage!{criticalHit}";
+                
+                    await UpdateImage(firstAttacker, secondAttacker, output, pvpImage);
+            
 
                     var winner = await CheckWinner(firstAttacker, secondAttacker, attacker, attackerUser, defender, defenderUser, pvpImage);
                     if (winner)

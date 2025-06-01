@@ -4,10 +4,10 @@ namespace AFamiliarWorld.Bot.Familiars;
 
 public class PaperCraneGolem:Familiar
 {
-    private List<Func<Task<FamiliarAttackingAction>>> actions;
+    private List<Func<Familiar, Task<FamiliarAttackingAction>>> actions;
     public PaperCraneGolem()
     {
-        this.actions = new List<Func<Task<FamiliarAttackingAction>>>
+        this.actions = new List<Func<Familiar, Task<FamiliarAttackingAction>>>
         {
             PapercutBarrage,
             GuillotineFold,
@@ -34,13 +34,13 @@ public class PaperCraneGolem:Familiar
         this.Speed = 7;
         this.Cuteness = random.Next(1, 10001);
     }
-    public override async Task<FamiliarAttackingAction> Attack()
+    public override async Task<FamiliarAttackingAction> Attack(Familiar enemyFamiliar)
     {
         var random = new Random();
         var randomAbility = actions[random.Next(actions.Count)];
-        return await randomAbility.Invoke();
+        return await randomAbility.Invoke(enemyFamiliar);
     }
-    public async Task<FamiliarAttackingAction> PapercutBarrage()
+    public async Task<FamiliarAttackingAction> PapercutBarrage(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -55,7 +55,7 @@ public class PaperCraneGolem:Familiar
         return action;
     }
     
-    public async Task<FamiliarAttackingAction> GuillotineFold()
+    public async Task<FamiliarAttackingAction> GuillotineFold(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -66,7 +66,7 @@ public class PaperCraneGolem:Familiar
         return action;
     }
     
-    public async Task<FamiliarAttackingAction> ConfettiBurst()
+    public async Task<FamiliarAttackingAction> ConfettiBurst(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();

@@ -4,10 +4,10 @@ namespace AFamiliarWorld.Bot.Familiars;
 
 public class StarRaven:Familiar
 {
-    private List<Func<Task<FamiliarAttackingAction>>> actions;
+    private List<Func<Familiar, Task<FamiliarAttackingAction>>> actions;
     public StarRaven()
     {
-        this.actions = new List<Func<Task<FamiliarAttackingAction>>>
+        this.actions = new List<Func<Familiar, Task<FamiliarAttackingAction>>>
         {
             Peck,
             EnvelopingVoid,
@@ -36,13 +36,13 @@ public class StarRaven:Familiar
         this.Speed = 11;
         this.Cuteness = random.Next(1, 10001);
     }
-    public override async Task<FamiliarAttackingAction> Attack()
+    public override async Task<FamiliarAttackingAction> Attack(Familiar enemyFamiliar)
     {
         var random = new Random();
         var randomAbility = actions[random.Next(actions.Count)];
-        return await randomAbility.Invoke();
+        return await randomAbility.Invoke(enemyFamiliar);
     }
-    public async Task<FamiliarAttackingAction> Peck()
+    public async Task<FamiliarAttackingAction> Peck(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -58,7 +58,7 @@ public class StarRaven:Familiar
         return action;
     }
 
-    public async Task<FamiliarAttackingAction> EnvelopingVoid()
+    public async Task<FamiliarAttackingAction> EnvelopingVoid(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -74,7 +74,7 @@ public class StarRaven:Familiar
         return action;
     }
     
-    public async Task<FamiliarAttackingAction> ColorSpray()
+    public async Task<FamiliarAttackingAction> ColorSpray(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -85,7 +85,7 @@ public class StarRaven:Familiar
         return action;
     }
     
-    public async Task<FamiliarAttackingAction> Starburn()
+    public async Task<FamiliarAttackingAction> Starburn(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -101,7 +101,7 @@ public class StarRaven:Familiar
         return action;
     }
     
-    public async Task<FamiliarAttackingAction> GuidingStar()
+    public async Task<FamiliarAttackingAction> GuidingStar(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();

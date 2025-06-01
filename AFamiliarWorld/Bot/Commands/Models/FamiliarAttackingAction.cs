@@ -8,4 +8,5 @@ public class FamiliarAttackingAction
     public bool CriticalHit { get; set; } = false;
     public List<StatusCondition>? StatusConditions { get; set; }
     public bool IsTrueDamage { get; set; } = false;
+    public string? CustomOutput { get; set; } = null;
 }
