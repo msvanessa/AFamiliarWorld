@@ -42,7 +42,7 @@ public class StarRaven:Familiar
         var randomAbility = actions[random.Next(actions.Count)];
         return await randomAbility.Invoke(enemyFamiliar);
     }
-    public async Task<FamiliarAttackingAction> Peck(Familiar familiar)
+    public async Task<FamiliarAttackingAction> Peck(Familiar enemyFamiliar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -52,13 +52,13 @@ public class StarRaven:Familiar
         {
             action.CriticalHit = true;
         }
-        // Should reduce enemy's physique by 2
+        enemyFamiliar.Physique -= 2;
         action.Damage = (Power + random.Next(1, 21)) * (crit);
         action.DamageType = DamageType.Physical;
         return action;
     }
 
-    public async Task<FamiliarAttackingAction> EnvelopingVoid(Familiar familiar)
+    public async Task<FamiliarAttackingAction> EnvelopingVoid(Familiar enemyFamiliar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -68,8 +68,8 @@ public class StarRaven:Familiar
         {
             action.CriticalHit = true;
         }
-        // Should reduce enemy's resolve by  2
         action.Damage = (Willpower + random.Next(1, 21)) * (crit);
+        enemyFamiliar.Resolve -= 2;
         action.DamageType = DamageType.Magical;
         return action;
     }

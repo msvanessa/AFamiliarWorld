@@ -31,6 +31,11 @@ public class CommandHandler
         // See Dependency Injection guide for more information.
         await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(), 
                                         services: null);
+        _commands.Log += message =>
+        {
+            Console.WriteLine(message);
+            return Task.CompletedTask;
+        };
     }
 
     private async Task HandleCommandAsync(SocketMessage messageParam)

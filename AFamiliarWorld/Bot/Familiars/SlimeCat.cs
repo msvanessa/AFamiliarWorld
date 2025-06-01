@@ -65,7 +65,7 @@ public class SlimeCat:Familiar
         return action;
     }
 
-    public async Task<FamiliarAttackingAction> AcidicLick(Familiar familiar)
+    public async Task<FamiliarAttackingAction> AcidicLick(Familiar enemyFamiliar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -76,7 +76,8 @@ public class SlimeCat:Familiar
             action.CriticalHit = true;
         }
         action.Damage = (Willpower + random.Next(1, 21)) * (crit);
-        // Is supposed to reduce enemy Physique and Resolve by 1
+        enemyFamiliar.Physique -= 1;
+        enemyFamiliar.Resolve -= 1;
         action.DamageType = DamageType.Magical;
         return action;
     }
