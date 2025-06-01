@@ -116,12 +116,14 @@ public class FamiliarBattles
                 var firstWinner = await CheckWinner(firstAttacker, secondAttacker, firstAttacker, firstAttackerUser, secondAttacker, secondAttackerUser, pvpImage);
                 if (firstWinner)
                 {
+                    FileManager.UpdateStatisticLogger(firstAttacker, secondAttacker, WinCondition.StatusCondition);
                     return firstAttackerUser;
                 }
                 
                 var secondWinner = await CheckWinner(firstAttacker, secondAttacker, secondAttacker, secondAttackerUser, firstAttacker, firstAttackerUser, pvpImage);
                 if (secondWinner)
                 {
+                    FileManager.UpdateStatisticLogger(secondAttacker, firstAttacker, WinCondition.StatusCondition);
                     return secondAttackerUser;
                 }
             }
@@ -156,9 +158,9 @@ public class FamiliarBattles
                 if ((await attacker.GetStatusConditions()).Contains(StatusCondition.Confuse) && confused)
                 {
                     
-                    attacker.Health -= 3;
+                    attacker.Health -= 20;
                     await UpdateImage(firstAttacker, secondAttacker,
-                        $"{attackerUser.Username}'s {attacker.Name} is confused and hurts itself in its confusion for 3 damage!", pvpImage);
+                        $"{attackerUser.Username}'s {attacker.Name} is confused and hurts itself in its confusion for 20 damage!", pvpImage);
                 }
                 else
                 {
@@ -172,23 +174,38 @@ public class FamiliarBattles
                         $"{criticalHit}{attackerUser.Username}'s {attacker.Name} attacks using {attack.AbilityName} for {defend.DamageTaken} damage!{criticalHit}",
                         pvpImage);
 
-                    var winner = await CheckWinner(firstAttacker, secondAttacker, defender, defenderUser, attacker, attackerUser, pvpImage);
+
+                    var winner = await CheckWinner(firstAttacker, secondAttacker, attacker, attackerUser, defender, defenderUser, pvpImage);
                     if (winner)
                     {
-                        return (defender, defenderUser);
-                    }
-                    winner = await CheckWinner(firstAttacker, secondAttacker, attacker, attackerUser, defender, defenderUser, pvpImage);
-                    if (winner)
-                    {
+                        FileManager.UpdateStatisticLogger(attacker, defender, WinCondition.NormalDamage);
                         return (attacker, attackerUser);
+                    }
+                    winner = await CheckWinner(firstAttacker, secondAttacker, defender, defenderUser, attacker, attackerUser, pvpImage);
+                    if (winner)
+                    {
+                        FileManager.UpdateStatisticLogger(defender, attacker, WinCondition.NormalDamage);
+                        return (defender, defenderUser);
                     }
 
                     if (defend.IsReflecting)
                     {
-                        attacker.Health -= defend.DamageReflected;
-                        await UpdateImage(firstAttacker, secondAttacker,
-                            $"{defenderUser.Username}'s {defender.Name} reflects {defend.DamageReflected} damage back using its {defend.DamageReflectedMessage}!",
-                            pvpImage);
+                        if (!attack.IsTrueDamage && attack.Damage != 0)
+                        {
+                            attacker.Health -= defend.DamageReflected;
+                            await UpdateImage(firstAttacker, secondAttacker,
+                                $"{defenderUser.Username}'s {defender.Name} reflects {defend.DamageReflected} damage back using its {defend.DamageReflectedMessage}!",
+                                pvpImage);
+
+                            winner = await CheckWinner(firstAttacker, secondAttacker, defender, defenderUser, attacker,
+                                attackerUser, pvpImage);
+                            if (winner)
+                            {
+                                FileManager.UpdateStatisticLogger(defender, attacker, WinCondition.ReflectedDamage);
+                                return (defender, defenderUser);
+
+                            }
+                        }
                     }
                    
                     winner = await CheckWinner(firstAttacker, secondAttacker, defender, defenderUser, attacker,
@@ -221,13 +238,13 @@ public class FamiliarBattles
                 switch (statusCondition)
                 {
                     case StatusCondition.Burn:
-                        familiarToCheck.Health -= 2;
+                        familiarToCheck.Health -= 20;
 
                         await UpdateImage(firstAttacker, secondAttacker,
-                            $"{user.Username}'s {familiarToCheck.Name} is burning! They take 2 fire damage.", pvpImage);
+                            $"{user.Username}'s {familiarToCheck.Name} is burning! They take 20 fire damage.", pvpImage);
                         break;
                     case StatusCondition.Poison:
-                        var damage = (await familiarToCheck.GetStatusConditions()).Count(s=>s == StatusCondition.Poison);
+                        var damage = ((await familiarToCheck.GetStatusConditions()).Count(s=>s == StatusCondition.Poison)) * 10;
                         familiarToCheck.Health -= damage;
                         
                         await UpdateImage(firstAttacker, secondAttacker,

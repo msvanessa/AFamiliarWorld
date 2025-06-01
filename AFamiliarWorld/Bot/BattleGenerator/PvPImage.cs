@@ -1,4 +1,5 @@
-﻿using AFamiliarWorld.Bot.Familiars;
+﻿using AFamiliarWorld.Bot.Commands.Models;
+using AFamiliarWorld.Bot.Familiars;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
@@ -12,6 +13,7 @@ public class PvPImage
 {
     private const string _BackgroundImagePath = "Assets/PvP/PvPBackground.png";
     private const string _FamiliarImagePath = "Assets/Familiars/";
+    private const string _StatusConditionImagePath = "Assets/StatusConditions/";
     private List<MemoryStream> _imageStreams = new List<MemoryStream>();
     public PvPImage()
     {
@@ -50,14 +52,15 @@ public class PvPImage
     
     public async Task GeneratePvPImage(Familiar left, Familiar right, string battleText)
     {
+        // Background
         using var backgroundImage = Image.Load<Rgba32>(_BackgroundImagePath);
         var leftFamiliarImagePath = $"{_FamiliarImagePath}{left.Name.ToLower().Replace(" ", "")}.png";
         var rightFamiliarImagePath = $"{_FamiliarImagePath}{right.Name.ToLower().Replace(" ", "")}.png";
+        
+        // Familiars
         using var leftFamiliarImage = Image.Load<Rgba32>(leftFamiliarImagePath);
         using var rightFamiliarImage = Image.Load<Rgba32>(rightFamiliarImagePath);
         rightFamiliarImage.Mutate(ctx => ctx.Flip(FlipMode.Horizontal));
-        
-        // Optionally remove EXIF profiles if interfering
         rightFamiliarImage.Metadata.ExifProfile = null;
 
         backgroundImage.Mutate(ctx =>
@@ -67,20 +70,18 @@ public class PvPImage
             
         });
 
-        // Set up health bar parameters
+        // HP bars
         int barWidth = 275, barHeight = 33, barOffset = 15;
         int leftBarX = 170;
-        int leftBarY = 576 - barOffset;
+        int BarY = 556 - barOffset;
         int rightBarX = 1061;
-        int rightBarY = 580 - barOffset;
         int leftHealthFillWidth = (int)((left.Health / (float)left.MaxHealth) * barWidth);
         int rightHealthFillWidth = (int)((right.Health / (float)right.MaxHealth) * barWidth);
-        var leftBarBackground = new Rectangle(leftBarX, leftBarY, barWidth, barHeight);
-        var leftBarFill = new Rectangle(leftBarX, leftBarY, leftHealthFillWidth, barHeight);
-        var rightBarBackground = new Rectangle(rightBarX, rightBarY, barWidth, barHeight);
-        var rightBarFill = new Rectangle(rightBarX, rightBarY, rightHealthFillWidth, barHeight);
-
-        // Draw the HP bars in a separate mutate block
+        var leftBarBackground = new Rectangle(leftBarX, BarY, barWidth, barHeight);
+        var leftBarFill = new Rectangle(leftBarX, BarY, leftHealthFillWidth, barHeight);
+        var rightBarBackground = new Rectangle(rightBarX, BarY, barWidth, barHeight);
+        var rightBarFill = new Rectangle(rightBarX, BarY, rightHealthFillWidth, barHeight);
+        
         backgroundImage.Mutate<Rgba32>(ctx =>
         {
             ctx.Fill(Color.Red, leftBarBackground);
@@ -88,7 +89,8 @@ public class PvPImage
             ctx.Fill(Color.Red, rightBarBackground);
             ctx.Fill(Color.LimeGreen, rightBarFill);
         });
-
+        
+        // Text
         var battleTextBackground = new Rectangle(57, 115, 1436, 54);
         
         backgroundImage.Mutate<Rgba32>(ctx =>
@@ -113,6 +115,30 @@ public class PvPImage
             ctx.DrawText(textOptions, battleText, Color.White);
         });
         
+        // Status Conditions
+        foreach (var (statusCondition, index) in (await left.GetStatusConditions()).Select((value, i) => (value, i)))
+        {
+            if(statusCondition == StatusCondition.None || statusCondition == StatusCondition.Stun) continue;
+            
+            using var statusImage = Image.Load<Rgba32>($"{_StatusConditionImagePath}/{statusCondition.ToString()}.png");
+            statusImage.Mutate(ctx => ctx.Resize(64, 64));
+            backgroundImage.Mutate(ctx =>
+            {
+                ctx.DrawImage(statusImage, new Point(65 + (64 * index), 918), 1f);
+            });
+        }
+
+        foreach (var (statusCondition, index) in (await right.GetStatusConditions()).Select((value, i) => (value, i)))
+        {
+            if(statusCondition == StatusCondition.None || statusCondition == StatusCondition.Stun) continue;
+            
+            using var statusImage = Image.Load<Rgba32>($"{_StatusConditionImagePath}/{statusCondition.ToString()}.png");
+            statusImage.Mutate(ctx => ctx.Resize(64, 64));
+            backgroundImage.Mutate(ctx =>
+            {
+                ctx.DrawImage(statusImage, new Point(1000 + (64 * index), 918), 1f);
+            });
+        }
         
         var encoder = new PngEncoder
         {

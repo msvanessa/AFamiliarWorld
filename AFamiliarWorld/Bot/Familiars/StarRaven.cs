@@ -80,8 +80,7 @@ public class StarRaven:Familiar
         var action = new FamiliarAttackingAction();
         action.AbilityName = "Color Spray";
         action.Damage = 0;
-        action.StatusConditions = new List<StatusCondition>() { StatusCondition.Confuse };
-        action.StatusConditions = new List<StatusCondition>() { StatusCondition.Stun };
+        action.StatusConditions = new List<StatusCondition>() { StatusCondition.Confuse, StatusCondition.Stun };
         action.DamageType = DamageType.Magical;
         return action;
     }
@@ -108,10 +107,15 @@ public class StarRaven:Familiar
         var action = new FamiliarAttackingAction();
         action.AbilityName = "Guiding Star";
         action.Damage = 0;
+        action.IsTrueDamage = true;
         action.DamageType = DamageType.Magical;
         this.Willpower += 10;
         this.Power += 10;
-        this.Health += 5;
+        this.Health += 30;
+        if ((await this.GetStatusConditions()).Contains(StatusCondition.Bleed))
+        {
+            this.Health -= 15;
+        }
         return action;
     }
 }
