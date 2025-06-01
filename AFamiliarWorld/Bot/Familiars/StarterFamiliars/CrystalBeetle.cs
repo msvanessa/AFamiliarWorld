@@ -5,12 +5,12 @@ namespace AFamiliarWorld.Bot.Familiars;
 
 public class CrystalBeetle:Familiar
 {
-    private List<Func<Task<FamiliarAttackingAction>>> actions;
+    private List<Func<Familiar, Task<FamiliarAttackingAction>>> actions;
     private bool _isHunkeredDown = false;
     private int _shatterPulseDamage = 0;
     public CrystalBeetle()
     {
-        this.actions = new List<Func<Task<FamiliarAttackingAction>>>
+        this.actions = new List<Func<Familiar, Task<FamiliarAttackingAction>>>
         {
             BeetleBonk,
             Slam,
@@ -47,7 +47,7 @@ public class CrystalBeetle:Familiar
         this.Abilities.Add(new Ability("Spell: Shatter Pulse", $"A magical attack that deals half of {this.Power}+1d20 physical damage and applies a shatter pulse. The next time you use an attack, it will deal the other half ontop of your regular attack as magical damage."));
     }
     
-    public override async Task<FamiliarAttackingAction> Attack()
+    public override async Task<FamiliarAttackingAction> Attack(Familiar enemyFamiliar)
     {
         var shatterDamage = 0;
         if (this._shatterPulseDamage > 0)
@@ -57,12 +57,12 @@ public class CrystalBeetle:Familiar
         }
         var random = new Random();
         var randomAbility = actions[random.Next(actions.Count)];
-        var attackingaction = await randomAbility.Invoke();
+        var attackingaction = await randomAbility.Invoke(enemyFamiliar);
         attackingaction.Damage += shatterDamage;
         return attackingaction;
     }
 
-    public async Task<FamiliarAttackingAction> BeetleBonk()
+    public async Task<FamiliarAttackingAction> BeetleBonk(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -77,7 +77,7 @@ public class CrystalBeetle:Familiar
         return action;
     }
 
-    public async Task<FamiliarAttackingAction> Slam()
+    public async Task<FamiliarAttackingAction> Slam(Familiar familiar)
     {
         var action = new FamiliarAttackingAction();
         action.AbilityName = "Slam";
@@ -88,17 +88,18 @@ public class CrystalBeetle:Familiar
         return action;
     }
     
-    public async Task<FamiliarAttackingAction> HunkerDown()
+    public async Task<FamiliarAttackingAction> HunkerDown(Familiar familiar)
     {
         var action = new FamiliarAttackingAction();
         action.AbilityName = "Hunker down";
         action.Damage = 0;
+        action.CustomOutput = "The Crystal Beetle hunkers down, reducing incoming damage by its Willpower for the next attack";
         action.DamageType = DamageType.Physical;
         action.IsTrueDamage = true;
         this._isHunkeredDown = true;
         return action;
     }
-    public async Task<FamiliarAttackingAction> ShatterPulse()
+    public async Task<FamiliarAttackingAction> ShatterPulse(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -116,7 +117,7 @@ public class CrystalBeetle:Familiar
         
         return action;
     }
-    public async Task<FamiliarAttackingAction> PrismaticSpark()
+    public async Task<FamiliarAttackingAction> PrismaticSpark(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();

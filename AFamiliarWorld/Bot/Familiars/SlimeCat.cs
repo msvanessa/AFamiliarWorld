@@ -3,11 +3,11 @@ using AFamiliarWorld.Bot.Commands.Models;
 namespace AFamiliarWorld.Bot.Familiars;
 public class SlimeCat:Familiar
 {
-    private List<Func<Task<FamiliarAttackingAction>>> actions;
+    private List<Func<Familiar, Task<FamiliarAttackingAction>>> actions;
     private int ambushDamage = 0;
     public SlimeCat()
     {
-        this.actions = new List<Func<Task<FamiliarAttackingAction>>>
+        this.actions = new List<Func<Familiar, Task<FamiliarAttackingAction>>>
         {
             PseudopawStrike,
             AcidicLick,
@@ -36,7 +36,7 @@ public class SlimeCat:Familiar
         this.Speed = 2;
         this.Cuteness = random.Next(1, 10001);
     }
-    public override async Task<FamiliarAttackingAction> Attack()
+    public override async Task<FamiliarAttackingAction> Attack(Familiar enemyFamiliar)
     {
         var ambush = 0;
         if (this.ambushDamage > 0)
@@ -46,11 +46,11 @@ public class SlimeCat:Familiar
         }
         var random = new Random();
         var randomAbility = actions[random.Next(actions.Count)];
-        var attackingaction = await randomAbility.Invoke();
+        var attackingaction = await randomAbility.Invoke(enemyFamiliar);
         attackingaction.Damage += ambush;
         return attackingaction;
     }
-    public async Task<FamiliarAttackingAction> PseudopawStrike()
+    public async Task<FamiliarAttackingAction> PseudopawStrike(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -65,7 +65,7 @@ public class SlimeCat:Familiar
         return action;
     }
 
-    public async Task<FamiliarAttackingAction> AcidicLick()
+    public async Task<FamiliarAttackingAction> AcidicLick(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -81,7 +81,7 @@ public class SlimeCat:Familiar
         return action;
     }
 
-    public async Task<FamiliarAttackingAction> Purralysis()
+    public async Task<FamiliarAttackingAction> Purralysis(Familiar familiar)
     {
         var action = new FamiliarAttackingAction();
         action.AbilityName = "Purralysis";
@@ -92,7 +92,7 @@ public class SlimeCat:Familiar
         return action;
     }
 
-    public async Task<FamiliarAttackingAction> PuddleformAmbush()
+    public async Task<FamiliarAttackingAction> PuddleformAmbush(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -109,7 +109,7 @@ public class SlimeCat:Familiar
         return action;
     }
 
-    public async Task<FamiliarAttackingAction> Licc()
+    public async Task<FamiliarAttackingAction> Licc(Familiar familiar)
     {
         var action = new FamiliarAttackingAction();
         action.AbilityName = "Licc";

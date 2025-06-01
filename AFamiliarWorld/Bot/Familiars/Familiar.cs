@@ -144,7 +144,7 @@ public class Familiar
         return embed.Build();
     }
 
-    public virtual async Task<FamiliarAttackingAction> Attack()
+    public virtual async Task<FamiliarAttackingAction> Attack(Familiar enemyFamiliar)
     {
         return null;
     }

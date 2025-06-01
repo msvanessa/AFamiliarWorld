@@ -4,11 +4,11 @@ namespace AFamiliarWorld.Bot.Familiars;
 
 public class Batnana:Familiar
 {
-    private List<Func<Task<FamiliarAttackingAction>>> actions;
+    private List<Func<Familiar, Task<FamiliarAttackingAction>>> actions;
     private bool isEvading = false;
     public Batnana()
     {
-        this.actions = new List<Func<Task<FamiliarAttackingAction>>>
+        this.actions = new List<Func<Familiar, Task<FamiliarAttackingAction>>>
         {
             Monch,
             EvasiveFlutter,
@@ -43,13 +43,13 @@ public class Batnana:Familiar
         this.Abilities.Add(new Ability("Spell: FruitfulShriek", $"A physical attack that deals 10 true damage and stuns the target."));
         this.Abilities.Add(new Ability("Spell: Scritchies", $"A physical attack that deals 20 true damage and causes the target to bleed."));
     }
-    public override async Task<FamiliarAttackingAction> Attack()
+    public override async Task<FamiliarAttackingAction> Attack(Familiar enemyFamiliar)
     {
         var random = new Random();
         var randomAbility = actions[random.Next(actions.Count)];
-        return await randomAbility.Invoke();
+        return await randomAbility.Invoke(enemyFamiliar);
     }
-    public async Task<FamiliarAttackingAction> Monch()
+    public async Task<FamiliarAttackingAction> Monch(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -70,7 +70,7 @@ public class Batnana:Familiar
         return action;
     }
 
-    public async Task<FamiliarAttackingAction> EvasiveFlutter()
+    public async Task<FamiliarAttackingAction> EvasiveFlutter(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -81,7 +81,7 @@ public class Batnana:Familiar
         return action;
     }
     
-    public async Task<FamiliarAttackingAction> PotassiumSurge()
+    public async Task<FamiliarAttackingAction> PotassiumSurge(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -93,7 +93,7 @@ public class Batnana:Familiar
         return action;
     }
     
-    public async Task<FamiliarAttackingAction> FruitfulShriek()
+    public async Task<FamiliarAttackingAction> FruitfulShriek(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -105,7 +105,7 @@ public class Batnana:Familiar
         return action;
     }
     
-    public async Task<FamiliarAttackingAction> Scritchies()
+    public async Task<FamiliarAttackingAction> Scritchies(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();

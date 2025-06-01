@@ -4,10 +4,10 @@ namespace AFamiliarWorld.Bot.Familiars;
 
 public class Bandcoon:Familiar
 {
-    private List<Func<Task<FamiliarAttackingAction>>> actions;
+    private List<Func<Familiar, Task<FamiliarAttackingAction>>> actions;
     public Bandcoon()
     {
-        this.actions = new List<Func<Task<FamiliarAttackingAction>>>
+        this.actions = new List<Func<Familiar, Task<FamiliarAttackingAction>>>
         {
             Moneysack,
             Eattrash,
@@ -41,13 +41,13 @@ public class Bandcoon:Familiar
         this.Abilities.Add(new Ability("Spell: Wash food", $"Washes its food and attacks them. Deals {this.Power}+1d20 damage and removes a random status condition from itself."));
     }
     
-    public override async Task<FamiliarAttackingAction> Attack()
+    public override async Task<FamiliarAttackingAction> Attack(Familiar enemyFamiliar)
     {
         var random = new Random();
         var randomAbility = actions[random.Next(actions.Count)];
-        return await randomAbility.Invoke();
+        return await randomAbility.Invoke(enemyFamiliar);
     }
-    public async Task<FamiliarAttackingAction> Moneysack()
+    public async Task<FamiliarAttackingAction> Moneysack(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -116,7 +116,7 @@ public class Bandcoon:Familiar
         return action;
     }
     
-    public async Task<FamiliarAttackingAction> Eattrash()
+    public async Task<FamiliarAttackingAction> Eattrash(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -128,30 +128,38 @@ public class Bandcoon:Familiar
         switch (option)
         {
             case 0:
+                action.CustomOutput = $"Bandcoon uses {action.AbilityName} and gains 10 Power!";
                 this.Power += 10;
                 break;
             case 1:
                 this.Physique += 10;
+                action.CustomOutput = $"Bandcoon uses {action.AbilityName} and gains 10 Physique!";
                 break;
             case 2:
                 this.Willpower += 10;
+                action.CustomOutput = $"Bandcoon uses {action.AbilityName} and gains 10 Willpower!";
                 break;
             case 3:
                 this.Resolve += 10;
+                action.CustomOutput = $"Bandcoon uses {action.AbilityName} and gains 10 Resolve!";
                 break;
             case 4:
                 this.Luck += 5;
+                action.CustomOutput = $"Bandcoon uses {action.AbilityName} and gains 5 Luck!";
                 break;
             case 5:
                 this.Speed += 10;
+                action.CustomOutput = $"Bandcoon uses {action.AbilityName} and gains 10 Speed!";
                 break;
             case 6:
                 if ((await this.GetStatusConditions()).Contains(StatusCondition.Bleed))
                 {
+                    action.CustomOutput = $"Bandcoon uses {action.AbilityName} and heals 25 HP!";
                     this.Health += 25;
                 }
                 else
                 {
+                    action.CustomOutput = $"Bandcoon uses {action.AbilityName} and heals 50 HP!";
                     this.Health += 50;
                 }
 
@@ -163,7 +171,7 @@ public class Bandcoon:Familiar
         
         return action;
     }
-    public async Task<FamiliarAttackingAction> Pistolwhip()
+    public async Task<FamiliarAttackingAction> Pistolwhip(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
@@ -180,13 +188,13 @@ public class Bandcoon:Familiar
         {
             this.Health -= 50;
             action.Damage = 0;
-            action.AbilityName += " (and hits itself instead for 50 damage)";
+            action.CustomOutput = "Bandcoon tries to pistol whip, but accidentally hits itself instead for 50 damage!";
         }
         
         return action;
     }
 
-    public async Task<FamiliarAttackingAction> Washfood()
+    public async Task<FamiliarAttackingAction> Washfood(Familiar familiar)
     {
         var random = new Random();
         var action = new FamiliarAttackingAction();
