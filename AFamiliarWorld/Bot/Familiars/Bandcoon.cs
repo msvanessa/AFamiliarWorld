@@ -73,35 +73,35 @@ public class Bandcoon:Familiar
             },
             new FamiliarAttackingAction()
             {
-                Damage = 1,
+                Damage = 10,
                 DamageType = DamageType.Physical,
                 IsTrueDamage = true,
                 StatusConditions = new List<StatusCondition>() { StatusCondition.Stun }
             },
             new FamiliarAttackingAction()
             {
-                Damage = 2,
+                Damage = 20,
                 DamageType = DamageType.Physical,
                 IsTrueDamage = true,
                 StatusConditions = new List<StatusCondition>() { StatusCondition.Burn }
             },
             new FamiliarAttackingAction()
             {
-                Damage = 2,
+                Damage = 20,
                 DamageType = DamageType.Physical,
                 IsTrueDamage = true,
                 StatusConditions = new List<StatusCondition>() { StatusCondition.Poison }
             },
             new FamiliarAttackingAction()
             {
-                Damage = 2,
+                Damage = 20,
                 DamageType = DamageType.Physical,
                 IsTrueDamage = true,
                 StatusConditions = new List<StatusCondition>() { StatusCondition.Bleed }
             },
             new FamiliarAttackingAction()
             {
-                Damage = 2,
+                Damage = 20,
                 DamageType = DamageType.Physical,
                 IsTrueDamage = true,
                 StatusConditions = new List<StatusCondition>() { StatusCondition.Confuse }

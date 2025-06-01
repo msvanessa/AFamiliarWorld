@@ -26,10 +26,10 @@ public class CrystalBeetle:Familiar
         this.Emoji = "<:FamiliarCrystalbeetle:1378164202245587055>";
         this.Url = "https://cdn.discordapp.com/attachments/1246170699362729995/1375184355504423063/assets_task_01jvwnaxt0eyzbc2bbb853pmxf_1747939882_img_0.webp?ex=68316c7c&is=68301afc&hm=66a1087f14c1e0cbe2c431e9cff617e260f809df7e5a73b86f88e566330f0e3a&";
         this.Power = 25;
-        this.Physique = 20;
+        this.Physique = 25;
         
         this.Willpower = 25;
-        this.Resolve = 20;
+        this.Resolve = 25;
         
         this.Luck = 5;
         
@@ -43,15 +43,23 @@ public class CrystalBeetle:Familiar
         this.Abilities.Add(new Ability("Spell: Beetle Bonk", $"A basic physical attack that deals {this.Power}+1d20 damage. Has a 20% chance to crit."));
         this.Abilities.Add(new Ability("Spell: Slam", $"A physical attack that deals 10 true damage and stuns the target."));
         this.Abilities.Add(new Ability("Spell: Hunker Down", $"A defensive ability that deals 0 damage, but reduces incoming damage by your Willpower for the next attack."));
-        this.Abilities.Add(new Ability("Spell: Prismatic Spark", $"A magical attack that deals {this.Willpower}+1d20 damage. Has a 20% chance to crit."));
+        this.Abilities.Add(new Ability("Spell: Prismatic Spark", $"A magical attack that deals {this.Willpower}+1d20 damage."));
         this.Abilities.Add(new Ability("Spell: Shatter Pulse", $"A magical attack that deals half of {this.Power}+1d20 physical damage and applies a shatter pulse. The next time you use an attack, it will deal the other half ontop of your regular attack as magical damage."));
     }
     
     public override async Task<FamiliarAttackingAction> Attack()
     {
+        var shatterDamage = 0;
+        if (this._shatterPulseDamage > 0)
+        {
+            shatterDamage += this._shatterPulseDamage;
+            this._shatterPulseDamage = 0;
+        }
         var random = new Random();
         var randomAbility = actions[random.Next(actions.Count)];
-        return await randomAbility.Invoke();
+        var attackingaction = await randomAbility.Invoke();
+        attackingaction.Damage += shatterDamage;
+        return attackingaction;
     }
 
     public async Task<FamiliarAttackingAction> BeetleBonk()
@@ -66,13 +74,6 @@ public class CrystalBeetle:Familiar
         }
         action.Damage = (Power + random.Next(1, 21)) * (crit);
         action.DamageType = DamageType.Physical;
-        
-        if (this._shatterPulseDamage > 0)
-        {
-            action.Damage += this._shatterPulseDamage;
-            this._shatterPulseDamage = 0;
-            action.DamageType = DamageType.Magical;
-        }
         return action;
     }
 
@@ -80,17 +81,10 @@ public class CrystalBeetle:Familiar
     {
         var action = new FamiliarAttackingAction();
         action.AbilityName = "Slam";
-        action.Damage = 1;
+        action.Damage = 10;
         action.DamageType = DamageType.Physical;
         action.IsTrueDamage = true;
         action.StatusConditions = new List<StatusCondition>{StatusCondition.Stun};
-        
-        if (this._shatterPulseDamage > 0)
-        {
-            action.Damage += this._shatterPulseDamage;
-            this._shatterPulseDamage = 0;
-            action.DamageType = DamageType.Magical;
-        }
         return action;
     }
     
@@ -102,12 +96,6 @@ public class CrystalBeetle:Familiar
         action.DamageType = DamageType.Physical;
         action.IsTrueDamage = true;
         this._isHunkeredDown = true;
-        
-        if (this._shatterPulseDamage > 0)
-        {
-            action.Damage = this._shatterPulseDamage;
-            this._shatterPulseDamage = 0;
-        }
         return action;
     }
     public async Task<FamiliarAttackingAction> ShatterPulse()
@@ -119,12 +107,6 @@ public class CrystalBeetle:Familiar
         if (crit == 2)
         {
             action.CriticalHit = true;
-        }
-
-        if (this._shatterPulseDamage > 0)
-        {
-            action.Damage = this._shatterPulseDamage;
-            this._shatterPulseDamage = 0;
         }
         var damage = (this.Willpower + random.Next(1, 21)) * (crit);
         
@@ -146,12 +128,6 @@ public class CrystalBeetle:Familiar
         }
         action.Damage = (this.Willpower + random.Next(1, 21)) * (crit);
         action.DamageType = DamageType.Magical;
-        
-        if (this._shatterPulseDamage > 0)
-        {
-            action.Damage += this._shatterPulseDamage;
-            this._shatterPulseDamage = 0;
-        }
         return action;
     }
     

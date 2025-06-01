@@ -11,13 +11,20 @@ namespace AFamiliarWorld.Bot.BattleGenerator;
 
 public class PvPImage
 {
-    private const string _BackgroundImagePath = "Assets/PvP/PvPBackground.png";
+    private string _BackgroundImagePath = "Assets/PvP/";
     private const string _FamiliarImagePath = "Assets/Familiars/";
     private const string _StatusConditionImagePath = "Assets/StatusConditions/";
     private List<MemoryStream> _imageStreams = new List<MemoryStream>();
     public PvPImage()
     {
-        
+        List <string> imagePaths = new List<string>
+        {
+            "PvPBackgroundDesert.png",
+            "PvPBackgroundGrassland.png",
+            "PvPBackgroundLava.png",
+            "PvPBackgroundWinter.png",
+        };
+        this._BackgroundImagePath += imagePaths[new Random().Next(0, imagePaths.Count)];
     }
     
     public async Task<MemoryStream> CompileMemoryStreams()
