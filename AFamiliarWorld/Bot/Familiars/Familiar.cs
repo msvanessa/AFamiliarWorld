@@ -50,6 +50,7 @@ public class Familiar
     {
         FamiliarID = Guid.NewGuid().ToString();
     }
+
     public async Task<List<Ability>> GetAbilities()
     {
         return Abilities;

@@ -36,7 +36,7 @@ public class FamiliarBattles
                 }
                 
                 await ReplyAsync($"{user.Username} accepted the challenge!");
-
+                await Context.Channel.TriggerTypingAsync();
                 var pvpImage = new PvPImage();
                 var winner = await Dual(Context, user, pvpImage);
                 if (winner == null) return;
